@@ -1,12 +1,16 @@
 import React, { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { getProjectById } from '../data/projects'
+import CallbackModal from '../components/CallbackModal'
+import MortgageCalculator from '../components/MortgageCalculator'
 
 const ProjectDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const project = getProjectById(id)
   const [selectedImage, setSelectedImage] = useState(0)
+  const [isCallbackModalOpen, setIsCallbackModalOpen] = useState(false)
+  const [isMortgageCalculatorOpen, setIsMortgageCalculatorOpen] = useState(false)
 
   if (!project) {
     return (
@@ -124,10 +128,16 @@ const ProjectDetailPage = () => {
                 </div>
 
                 <div className="space-y-3">
-                  <button className="w-full bg-primary-600 text-white py-3 rounded-lg hover:bg-primary-700 transition font-semibold">
+                  <button 
+                    onClick={() => setIsCallbackModalOpen(true)}
+                    className="w-full bg-primary-600 text-white py-3 rounded-lg hover:bg-primary-700 transition font-semibold"
+                  >
                     Заказать звонок
                   </button>
-                  <button className="w-full border-2 border-primary-600 text-primary-600 py-3 rounded-lg hover:bg-primary-50 transition font-semibold">
+                  <button 
+                    onClick={() => setIsMortgageCalculatorOpen(true)}
+                    className="w-full border-2 border-primary-600 text-primary-600 py-3 rounded-lg hover:bg-primary-50 transition font-semibold"
+                  >
                     Рассчитать ипотеку
                   </button>
                   <button className="w-full border-2 border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition font-semibold">
@@ -210,15 +220,32 @@ const ProjectDetailPage = () => {
             Свяжитесь с нами, и мы подберем для вас идеальную квартиру
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <button className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+            <button 
+              onClick={() => setIsCallbackModalOpen(true)}
+              className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+            >
               Заказать звонок
             </button>
-            <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary-600 transition">
+            <button 
+              onClick={() => setIsMortgageCalculatorOpen(true)}
+              className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary-600 transition"
+            >
               Рассчитать ипотеку
             </button>
           </div>
         </div>
       </section>
+
+      <CallbackModal 
+        isOpen={isCallbackModalOpen} 
+        onClose={() => setIsCallbackModalOpen(false)} 
+      />
+
+      <MortgageCalculator 
+        isOpen={isMortgageCalculatorOpen} 
+        onClose={() => setIsMortgageCalculatorOpen(false)}
+        initialPrice={project?.priceFrom?.replace(/\s/g, '').replace('₽', '') || ''}
+      />
     </div>
   )
 }

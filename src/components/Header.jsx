@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import CallbackModal from './CallbackModal'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isCallbackModalOpen, setIsCallbackModalOpen] = useState(false)
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
@@ -25,7 +27,10 @@ const Header = () => {
             <Link to="/" className="text-gray-700 hover:text-primary-600 font-medium transition">
               Контакты
             </Link>
-            <button className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition font-medium">
+            <button 
+              onClick={() => setIsCallbackModalOpen(true)}
+              className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition font-medium"
+            >
               Заказать звонок
             </button>
           </nav>
@@ -51,12 +56,23 @@ const Header = () => {
             <Link to="/" className="block py-2 text-gray-700 hover:text-primary-600">
               Контакты
             </Link>
-            <button className="mt-4 w-full bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition">
+            <button 
+              onClick={() => {
+                setIsCallbackModalOpen(true)
+                setIsMenuOpen(false)
+              }}
+              className="mt-4 w-full bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition"
+            >
               Заказать звонок
             </button>
           </div>
         )}
       </div>
+
+      <CallbackModal 
+        isOpen={isCallbackModalOpen} 
+        onClose={() => setIsCallbackModalOpen(false)} 
+      />
     </header>
   )
 }

@@ -29,16 +29,21 @@ const ProjectCard = ({ project }) => {
       
       <div className="p-6">
         <div className="flex items-start justify-between mb-2">
-          <h3 className="text-xl font-bold text-gray-800">{project.name}</h3>
-          <span className="text-sm text-gray-500">{project.district}</span>
+          <div className="flex-1">
+            <h3 className="text-xl font-bold text-gray-800 mb-1">{project.name}</h3>
+            {project.type && (
+              <p className="text-sm text-gray-500">Тип ЖК: {project.type}</p>
+            )}
+          </div>
+          <span className="text-sm text-gray-500 ml-2">{project.district}</span>
         </div>
         
         <p className="text-gray-600 text-sm mb-4 line-clamp-2">{project.description}</p>
         
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-2xl font-bold text-primary-600">{project.price}</p>
-            <p className="text-xs text-gray-500">от цены за м²</p>
+            <p className="text-2xl font-bold text-primary-600">{project.priceFrom}</p>
+            <p className="text-xs text-gray-500">от цены за квартиру</p>
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-600">Срок сдачи</p>
@@ -77,4 +82,5 @@ const ProjectCard = ({ project }) => {
 }
 
 export default ProjectCard
+
 

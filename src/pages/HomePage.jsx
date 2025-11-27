@@ -1,29 +1,97 @@
 import React, { useState, useMemo } from 'react'
 import FilterPanel from '../components/FilterPanel'
 import ProjectCard from '../components/ProjectCard'
+import MortgageCalculator from '../components/MortgageCalculator'
 import { projects } from '../data/projects'
 
 const HomePage = () => {
   const [filters, setFilters] = useState({
     district: '',
-    priceMin: '',
-    priceMax: '',
-    rooms: '',
+    housingClass: '',
+    housingType: '',
     status: '',
+    areaMin: '',
+    areaMax: '',
+    priceFromMin: '',
+    priceFromMax: '',
   })
+  const [isMortgageCalculatorOpen, setIsMortgageCalculatorOpen] = useState(false)
+
+  // Функция для определения класса жилья по цене
+  const getHousingClass = (price) => {
+    const priceNum = parseInt(price.replace(/\s/g, '').replace('₽', ''))
+    if (priceNum >= 400000) return 'Премиум'
+    if (priceNum >= 320000) return 'Комфорт +'
+    if (priceNum >= 250000) return 'Комфорт'
+    return 'Эконом'
+  }
+
+  // Функция для извлечения минимальной площади из строки "от 35 до 120 м²"
+  const getMinArea = (areaStr) => {
+    const match = areaStr.match(/от\s+(\d+)/)
+    return match ? parseInt(match[1]) : 0
+  }
+
+  // Функция для извлечения максимальной площади из строки "от 35 до 120 м²"
+  const getMaxArea = (areaStr) => {
+    const match = areaStr.match(/до\s+(\d+)/)
+    return match ? parseInt(match[1]) : Infinity
+  }
 
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
+      // Фильтр по району
       if (filters.district && project.district !== filters.district) return false
+
+      // Фильтр по классу жилья
+      if (filters.housingClass) {
+        const projectClass = getHousingClass(project.price)
+        if (projectClass !== filters.housingClass) return false
+      }
+
+      // Фильтр по типу жилья
+      if (filters.housingType) {
+        const projectRooms = project.rooms
+        // Проверяем соответствие типа жилья
+        if (filters.housingType === 'Студия' && !projectRooms.includes('Студия')) return false
+        if (filters.housingType === '1 спальня' && !projectRooms.includes('1')) return false
+        if (filters.housingType === '2 спальни' && !projectRooms.includes('2')) return false
+        if (filters.housingType === '3 спальни' && !projectRooms.includes('3')) return false
+        if (filters.housingType === 'Более 4 спален' && !projectRooms.includes('4') && !projectRooms.includes('5')) return false
+      }
+
+      // Фильтр по статусу
       if (filters.status && project.status !== filters.status) return false
-      if (filters.priceMin) {
-        const price = parseInt(project.price.replace(/\s/g, '').replace('₽', ''))
-        if (price < parseInt(filters.priceMin)) return false
+
+      // Фильтр по площади
+      if (filters.areaMin || filters.areaMax) {
+        const minArea = getMinArea(project.area)
+        const maxArea = getMaxArea(project.area)
+        
+        if (filters.areaMin) {
+          const filterMinArea = parseInt(filters.areaMin)
+          if (maxArea < filterMinArea) return false
+        }
+        if (filters.areaMax) {
+          const filterMaxArea = parseInt(filters.areaMax)
+          if (minArea > filterMaxArea) return false
+        }
       }
-      if (filters.priceMax) {
-        const price = parseInt(project.price.replace(/\s/g, '').replace('₽', ''))
-        if (price > parseInt(filters.priceMax)) return false
+
+      // Фильтр по цене от
+      if (filters.priceFromMin || filters.priceFromMax) {
+        const priceFrom = parseInt(project.priceFrom.replace(/\s/g, '').replace('₽', ''))
+        
+        if (filters.priceFromMin) {
+          const filterMinPrice = parseInt(filters.priceFromMin)
+          if (priceFrom < filterMinPrice) return false
+        }
+        if (filters.priceFromMax) {
+          const filterMaxPrice = parseInt(filters.priceFromMax)
+          if (priceFrom > filterMaxPrice) return false
+        }
       }
+
       return true
     })
   }, [filters])
@@ -31,20 +99,35 @@ const HomePage = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary-600 to-primary-800 text-white py-20">
-        <div className="container mx-auto px-4">
+      <section className="relative text-white py-20 overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: 'url(https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&q=80)'
+          }}
+        >
+          {/* Overlay для читаемости текста */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary-600/90 to-primary-800/90"></div>
+        </div>
+        
+        {/* Content */}
+        <div className="relative z-10 container mx-auto px-4">
           <div className="max-w-3xl">
-            <h1 className="text-5xl font-bold mb-6">
+            <h1 className="text-4xl sm:text-5xl font-bold mb-6">
               Квартиры в новостройках
             </h1>
-            <p className="text-xl mb-8 text-primary-100">
+            <p className="text-lg sm:text-xl mb-8 text-primary-100">
               Более 1000 квартир в лучших жилых комплексах. Выгодные условия покупки и рассрочка до 20 лет.
             </p>
             <div className="flex flex-wrap gap-4">
-              <button className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+              <button className="bg-white text-primary-600 px-6 sm:px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
                 Подобрать квартиру
               </button>
-              <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary-600 transition">
+              <button 
+                onClick={() => setIsMortgageCalculatorOpen(true)}
+                className="border-2 border-white text-white px-6 sm:px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary-600 transition"
+              >
                 Рассчитать ипотеку
               </button>
             </div>
@@ -115,6 +198,11 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      <MortgageCalculator 
+        isOpen={isMortgageCalculatorOpen} 
+        onClose={() => setIsMortgageCalculatorOpen(false)} 
+      />
     </div>
   )
 }
