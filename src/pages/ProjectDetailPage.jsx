@@ -1,18 +1,46 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { getProjectById } from '../data/projects'
+import { api } from '../services/api'
 import CallbackModal from '../components/CallbackModal'
 import MortgageCalculator from '../components/MortgageCalculator'
 
 const ProjectDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const project = getProjectById(id)
+  const [project, setProject] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [selectedImage, setSelectedImage] = useState(0)
   const [isCallbackModalOpen, setIsCallbackModalOpen] = useState(false)
   const [isMortgageCalculatorOpen, setIsMortgageCalculatorOpen] = useState(false)
 
-  if (!project) {
+  useEffect(() => {
+    loadProject()
+  }, [id])
+
+  const loadProject = async () => {
+    try {
+      setLoading(true)
+      const data = await api.getProjectById(id)
+      setProject(data)
+      setError(null)
+    } catch (err) {
+      console.error('Ошибка при загрузке проекта:', err)
+      setError('Проект не найден')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-12 text-center">
+        <p className="text-gray-600 text-lg">Загрузка проекта...</p>
+      </div>
+    )
+  }
+
+  if (error || !project) {
     return (
       <div className="container mx-auto px-4 py-12 text-center">
         <h1 className="text-3xl font-bold text-gray-800 mb-4">Проект не найден</h1>
@@ -22,6 +50,14 @@ const ProjectDetailPage = () => {
       </div>
     )
   }
+
+  // Получаем images и features (уже распарсены в API, но проверяем для обратной совместимости)
+  const projectImages = Array.isArray(project.images) 
+    ? project.images 
+    : (project.images ? (typeof project.images === 'string' ? JSON.parse(project.images) : []) : [])
+  const projectFeatures = Array.isArray(project.features) 
+    ? project.features 
+    : (project.features ? (typeof project.features === 'string' ? JSON.parse(project.features) : []) : [])
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -49,7 +85,7 @@ const ProjectDetailPage = () => {
             <div className="lg:col-span-2">
               <div className="relative h-96 rounded-xl overflow-hidden mb-4">
                 <img
-                  src={project.images[selectedImage]}
+                  src={projectImages[selectedImage] || project.image}
                   alt={project.name}
                   className="w-full h-full object-cover"
                 />
@@ -65,7 +101,7 @@ const ProjectDetailPage = () => {
                 )}
               </div>
               <div className="grid grid-cols-3 gap-4">
-                {project.images.map((image, index) => (
+                {projectImages.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
@@ -197,7 +233,7 @@ const ProjectDetailPage = () => {
               <div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Инфраструктура</h3>
                 <div className="grid grid-cols-2 gap-3">
-                  {project.features.map((feature, index) => (
+                  {projectFeatures.map((feature, index) => (
                     <div key={index} className="flex items-center space-x-2">
                       <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -238,13 +274,15 @@ const ProjectDetailPage = () => {
 
       <CallbackModal 
         isOpen={isCallbackModalOpen} 
-        onClose={() => setIsCallbackModalOpen(false)} 
+        onClose={() => setIsCallbackModalOpen(false)}
+        projectId={project?.id}
       />
 
       <MortgageCalculator 
         isOpen={isMortgageCalculatorOpen} 
         onClose={() => setIsMortgageCalculatorOpen(false)}
         initialPrice={project?.priceFrom?.replace(/\s/g, '').replace('₽', '') || ''}
+        projectId={project?.id}
       />
     </div>
   )

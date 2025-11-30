@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import CustomInput from './CustomInput'
 import CustomSelect from './CustomSelect'
+import { api } from '../services/api'
 
-const CallbackModal = ({ isOpen, onClose }) => {
+const CallbackModal = ({ isOpen, onClose, projectId = null }) => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -10,6 +11,16 @@ const CallbackModal = ({ isOpen, onClose }) => {
   })
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
+
+  // Сбрасываем состояние при закрытии модального окна
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({ name: '', phone: '', reason: '' })
+      setErrors({})
+      setIsSuccess(false)
+    }
+  }, [isOpen])
 
   // Валидация номера телефона
   const validatePhone = (phone) => {
@@ -52,7 +63,7 @@ const CallbackModal = ({ isOpen, onClose }) => {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     const newErrors = {}
@@ -84,23 +95,42 @@ const CallbackModal = ({ isOpen, onClose }) => {
     // Отправка формы
     setIsSubmitting(true)
     
-    // Имитация отправки (в реальном приложении здесь будет API запрос)
-    setTimeout(() => {
-      console.log('Форма отправлена:', formData)
-      setIsSubmitting(false)
-      // Очистка формы
+    try {
+      // Добавляем projectId, если он передан
+      const submitData = projectId 
+        ? { ...formData, projectId: projectId }
+        : formData
+      
+      await api.submitCallback(submitData)
+      
+      // Успешная отправка
+      setIsSuccess(true)
       setFormData({ name: '', phone: '', reason: '' })
       setErrors({})
-      // Закрытие модального окна
-      onClose()
-      // Здесь можно показать уведомление об успешной отправке
-      alert('Спасибо! Мы свяжемся с вами в ближайшее время.')
-    }, 1000)
+      
+      // Автоматически закрываем через 3 секунды
+      setTimeout(() => {
+        setIsSuccess(false)
+        onClose()
+      }, 3000)
+    } catch (err) {
+      console.error('Ошибка при отправке формы:', err)
+      
+      // Показываем ошибку пользователю
+      setErrors({ 
+        submit: err.message || 'Не удалось отправить форму. Попробуйте позже.' 
+      })
+      
+      // Не закрываем модальное окно при ошибке
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleClose = () => {
     setFormData({ name: '', phone: '', reason: '' })
     setErrors({})
+    setIsSuccess(false)
     onClose()
   }
 
@@ -112,7 +142,9 @@ const CallbackModal = ({ isOpen, onClose }) => {
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Заказать звонок</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              {isSuccess ? 'Заявка отправлена' : 'Заказать звонок'}
+            </h2>
             <button
               onClick={handleClose}
               className="text-gray-400 hover:text-gray-600 transition"
@@ -123,8 +155,28 @@ const CallbackModal = ({ isOpen, onClose }) => {
             </button>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          {isSuccess ? (
+            /* Success State */
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">Спасибо!</h3>
+              <p className="text-gray-600 mb-6">
+                Мы свяжемся с вами в ближайшее время.
+              </p>
+              <button
+                onClick={handleClose}
+                className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-semibold"
+              >
+                Закрыть
+              </button>
+            </div>
+          ) : (
+            /* Form */
+            <form onSubmit={handleSubmit} className="space-y-6">
             {/* Имя */}
             <CustomInput
               label="Ваше имя"
@@ -166,6 +218,13 @@ const CallbackModal = ({ isOpen, onClose }) => {
               required
             />
 
+            {/* Сообщение об ошибке отправки */}
+            {errors.submit && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                {errors.submit}
+              </div>
+            )}
+
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
               <button
@@ -185,6 +244,7 @@ const CallbackModal = ({ isOpen, onClose }) => {
               </button>
             </div>
           </form>
+          )}
         </div>
       </div>
     </div>

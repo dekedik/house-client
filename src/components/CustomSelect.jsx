@@ -29,7 +29,7 @@ const CustomSelect = ({
   const displayValue = selectedOption ? selectedOption.label : placeholder
 
   const handleSelect = (optionValue) => {
-    onChange({ target: { value: optionValue } })
+    onChange({ target: { name: props.name, value: optionValue } })
     setIsOpen(false)
   }
 

@@ -7,75 +7,129 @@ const ProjectCard = ({ project }) => {
   const handleDetailsClick = () => {
     navigate(`/project/${project.id}`)
   }
+  // Обрабатываем images - может быть массивом, строкой JSON или отсутствовать
+  let images = []
+  if (project.images) {
+    if (Array.isArray(project.images)) {
+      images = project.images
+    } else if (typeof project.images === 'string') {
+      try {
+        images = JSON.parse(project.images)
+      } catch (e) {
+        images = []
+      }
+    }
+  }
+  
+  // Если нет images, используем image
+  if (images.length === 0 && project.image) {
+    images = [project.image]
+  }
+  
+  const mainImage = images[0] || project.image || ''
+  const sideImage = images[1] || null // Одно изображение справа
+  const bottomImage = images[2] || null // Изображение под основным
+  const hasMoreImages = images.length > 3
+
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-      <div className="relative h-64 overflow-hidden">
-        <img
-          src={project.image}
-          alt={project.name}
-          className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-        />
-        {project.status && (
-          <span className="absolute top-4 left-4 bg-primary-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-            {project.status}
-          </span>
-        )}
-        {project.discount && (
-          <span className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-            {project.discount}
-          </span>
-        )}
-      </div>
-      
-      <div className="p-6">
-        <div className="flex items-start justify-between mb-2">
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-gray-800 mb-1">{project.name}</h3>
-            {project.type && (
-              <p className="text-sm text-gray-500">Тип ЖК: {project.type}</p>
+    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200">
+      <div className="flex flex-col md:flex-row">
+        {/* Блок с информацией */}
+        <div className="flex-1 p-4 md:p-6 flex flex-col">
+          <div className="flex items-start justify-between mb-2">
+            <div className="flex-1">
+              <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-1">{project.name}</h3>
+              <span className="text-base text-gray-500">{project.district}</span>
+            </div>
+          </div>
+          
+          <p className="text-gray-600 text-base mb-3 line-clamp-2 flex-1">{project.description}</p>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+            <div>
+              <p className="text-gray-500 text-base mb-1">Цена от</p>
+              <p className="text-xl font-bold text-primary-600">{project.priceFrom}</p>
+            </div>
+            <div>
+              <p className="text-gray-500 text-base mb-1">Срок сдачи</p>
+              <p className="text-base font-semibold text-gray-800">{project.completion}</p>
+            </div>
+            {project.rooms && (
+              <div>
+                <p className="text-gray-500 text-base mb-1">Комнаты</p>
+                <p className="text-base font-semibold text-gray-800">{project.rooms}</p>
+              </div>
+            )}
+            {project.area && (
+              <div>
+                <p className="text-gray-500 text-base mb-1">Площадь</p>
+                <p className="text-base font-semibold text-gray-800">{project.area}</p>
+              </div>
             )}
           </div>
-          <span className="text-sm text-gray-500 ml-2">{project.district}</span>
-        </div>
-        
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{project.description}</p>
-        
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-2xl font-bold text-primary-600">{project.priceFrom}</p>
-            <p className="text-xs text-gray-500">от цены за квартиру</p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm text-gray-600">Срок сдачи</p>
-            <p className="text-sm font-semibold text-gray-800">{project.completion}</p>
+
+          <div className="flex gap-2 mt-auto">
+            <button 
+              onClick={handleDetailsClick}
+              className="bg-primary-600 text-white py-2.5 px-6 rounded-lg hover:bg-primary-700 transition font-medium text-base"
+            >
+              Подробнее
+            </button>
           </div>
         </div>
-
-        <div className="flex items-center space-x-4 mb-4 text-sm text-gray-600">
-          {project.rooms && (
-            <div className="flex items-center space-x-1">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              <span>{project.rooms}</span>
+        
+        {/* Блок с изображениями */}
+        {mainImage && (
+          <div className="md:w-2/5 flex-shrink-0">
+            <div className="relative grid grid-cols-3 gap-1 h-48 md:h-full md:min-h-[200px] overflow-hidden">
+              {/* Большое основное изображение */}
+              <div className={`${sideImage ? "col-span-2" : "col-span-3"} relative overflow-hidden`}>
+                <img
+                  src={mainImage}
+                  alt={project.name}
+                  className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                />
+                {project.status && (
+                  <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium">
+                    {project.status}
+                  </span>
+                )}
+                {project.discount && (
+                  <span className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                    {project.discount}
+                  </span>
+                )}
+              </div>
+              
+              {/* Правая колонка с одним изображением */}
+              {sideImage && (
+                <div className="col-span-1 relative overflow-hidden">
+                  <img
+                    src={sideImage}
+                    alt={`${project.name} 2`}
+                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                  />
+                </div>
+              )}
             </div>
-          )}
-          {project.parking && (
-            <div className="flex items-center space-x-1">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-              </svg>
-              <span>{project.parking}</span>
-            </div>
-          )}
-        </div>
-
-        <button 
-          onClick={handleDetailsClick}
-          className="w-full bg-primary-600 text-white py-3 rounded-lg hover:bg-primary-700 transition font-medium"
-        >
-          Подробнее
-        </button>
+            
+            {/* Изображение под основным (если есть) */}
+            {bottomImage && (
+              <div className="relative h-24 overflow-hidden">
+                <img
+                  src={bottomImage}
+                  alt={`${project.name} 3`}
+                  className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                />
+                {hasMoreImages && (
+                  <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                    <span className="text-white font-semibold text-xs uppercase">Показать еще</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
