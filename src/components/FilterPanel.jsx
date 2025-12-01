@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import MoreFiltersModal from './MoreFiltersModal'
 import CustomSelect from './CustomSelect'
 
-const FilterPanel = ({ onFilterChange }) => {
+const FilterPanel = ({ onFilterChange, initialFilters = null }) => {
   const [filters, setFilters] = useState({
     district: '',
     housingClass: '',
@@ -14,6 +14,19 @@ const FilterPanel = ({ onFilterChange }) => {
     priceFromMax: '',
   })
   const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false)
+
+  // Синхронизируем фильтры с пропсами, если они переданы
+  useEffect(() => {
+    if (initialFilters) {
+      setFilters(prevFilters => {
+        // Обновляем только если фильтры действительно изменились
+        const hasChanges = Object.keys(initialFilters).some(
+          key => prevFilters[key] !== initialFilters[key]
+        )
+        return hasChanges ? initialFilters : prevFilters
+      })
+    }
+  }, [initialFilters])
 
   const districts = [
     { value: '', label: 'Все районы' },

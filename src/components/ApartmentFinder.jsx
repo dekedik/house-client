@@ -65,12 +65,7 @@ const ApartmentFinder = ({ isOpen, onClose, onApplyFilters }) => {
       priceFromMax: '',
     }
 
-    // Если выбран вторичный рынок, не применяем фильтр по району
-    if (answers.district === 'Вторичный рынок') {
-      filters.district = ''
-    }
-
-    // Применяем фильтры
+    // Применяем фильтры (вторичный рынок будет отображаться в фильтрах, но не применяться к API)
     onApplyFilters(filters)
     
     // Закрываем модальное окно

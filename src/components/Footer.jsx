@@ -21,10 +21,42 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Новостройки</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
-              <li><Link to="/" className="hover:text-white transition">Все проекты</Link></li>
-              <li><Link to="/" className="hover:text-white transition">Премиум класс</Link></li>
-              <li><Link to="/" className="hover:text-white transition">Бизнес класс</Link></li>
-              <li><Link to="/" className="hover:text-white transition">Комфорт класс</Link></li>
+              <li>
+                <Link 
+                  to="/" 
+                  state={{ filters: { district: '', housingClass: '', housingType: '', status: '', areaMin: '', areaMax: '', priceFromMin: '', priceFromMax: '' } }}
+                  className="hover:text-white transition"
+                >
+                  Все проекты
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/" 
+                  state={{ filters: { district: '', housingClass: 'Премиум', housingType: '', status: '', areaMin: '', areaMax: '', priceFromMin: '', priceFromMax: '' } }}
+                  className="hover:text-white transition"
+                >
+                  Премиум 
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/" 
+                  state={{ filters: { district: '', housingClass: 'Комфорт +', housingType: '', status: '', areaMin: '', areaMax: '', priceFromMin: '', priceFromMax: '' } }}
+                  className="hover:text-white transition"
+                >
+                  Комфорт+
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/" 
+                  state={{ filters: { district: '', housingClass: 'Комфорт', housingType: '', status: '', areaMin: '', areaMax: '', priceFromMin: '', priceFromMax: '' } }}
+                  className="hover:text-white transition"
+                >
+                  Комфорт
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -32,9 +64,7 @@ const Footer = () => {
             <h3 className="font-semibold mb-4">Компания</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
               <li><Link to="/" className="hover:text-white transition">О нас</Link></li>
-              <li><Link to="/" className="hover:text-white transition">Команда</Link></li>
-              <li><Link to="/" className="hover:text-white transition">Отзывы</Link></li>
-              <li><Link to="/" className="hover:text-white transition">Вакансии</Link></li>
+              
             </ul>
           </div>
 

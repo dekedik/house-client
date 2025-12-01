@@ -63,7 +63,7 @@ const ProjectDetailPage = () => {
     <div className="bg-gray-50 min-h-screen">
       {/* Breadcrumbs */}
       <div className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 py-4 max-w-4xl">
           <nav className="flex items-center space-x-2 text-sm">
             <Link to="/" className="text-gray-500 hover:text-primary-600">
               Главная
@@ -175,9 +175,6 @@ const ProjectDetailPage = () => {
                     className="w-full border-2 border-primary-600 text-primary-600 py-3 rounded-lg hover:bg-primary-50 transition font-semibold"
                   >
                     Рассчитать ипотеку
-                  </button>
-                  <button className="w-full border-2 border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition font-semibold">
-                    Записаться на просмотр
                   </button>
                 </div>
               </div>
