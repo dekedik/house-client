@@ -23,8 +23,8 @@ const processProject = (project) => {
   // Парсим images
   if (project.images) {
     project.images = parseJsonField(project.images) || []
-  }
-  
+    }
+
   // Парсим features
   if (project.features) {
     project.features = parseJsonField(project.features) || []
@@ -69,7 +69,7 @@ export const api = {
         },
       })
 
-      if (!response.ok) {
+    if (!response.ok) {
         if (response.status === 404) {
           throw new Error('Проекты не найдены')
         }
@@ -77,7 +77,7 @@ export const api = {
           throw new Error(`Ошибка сервера: ${response.status}`)
         }
         throw new Error(`Ошибка при загрузке проектов: ${response.status}`)
-      }
+    }
 
       const projects = await response.json()
       
@@ -159,7 +159,7 @@ export const api = {
       // Добавляем project_id, если он передан (бэкенд ожидает project_id, а не projectId)
       if (data.projectId) {
         requestBody.project_id = data.projectId
-      }
+    }
 
       // Добавляем house_id, если он передан
       if (data.house_id) {
@@ -179,7 +179,7 @@ export const api = {
         body: JSON.stringify(requestBody),
       })
 
-      if (!response.ok) {
+    if (!response.ok) {
         if (response.status >= 400 && response.status < 500) {
           const errorData = await response.json().catch(() => ({}))
           throw new Error(errorData.message || 'Ошибка при отправке формы')
@@ -188,7 +188,7 @@ export const api = {
           throw new Error(`Ошибка сервера: ${response.status}`)
         }
         throw new Error(`Ошибка при отправке формы: ${response.status}`)
-      }
+    }
 
       const result = await response.json()
       return result

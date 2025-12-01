@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react'
 import FilterPanel from '../components/FilterPanel'
 import ProjectCard from '../components/ProjectCard'
 import MortgageCalculator from '../components/MortgageCalculator'
+import ApartmentFinder from '../components/ApartmentFinder'
 import { api } from '../services/api'
 
 const HomePage = () => {
@@ -19,18 +20,19 @@ const HomePage = () => {
     priceFromMax: '',
   })
   const [isMortgageCalculatorOpen, setIsMortgageCalculatorOpen] = useState(false)
+  const [isApartmentFinderOpen, setIsApartmentFinderOpen] = useState(false)
   const filterSectionRef = useRef(null)
 
   // Загрузка проектов при монтировании и при изменении фильтров
   useEffect(() => {
-    const loadProjects = async () => {
-      try {
-        setLoading(true)
+  const loadProjects = async () => {
+    try {
+      setLoading(true)
         
         // Преобразуем фильтры для API
         // API ожидает priceMin/priceMax, но в компоненте используются priceFromMin/priceFromMax
         const apiFilters = {
-          district: filters.district || undefined,
+          district: filters.district && filters.district !== 'Вторичный рынок' ? filters.district : undefined,
           status: filters.status || undefined,
           type: filters.type || undefined,
           areaMin: filters.areaMin || undefined,
@@ -47,15 +49,15 @@ const HomePage = () => {
         })
         
         const data = await api.getProjects(apiFilters)
-        setProjects(data)
-        setError(null)
-      } catch (err) {
-        console.error('Ошибка при загрузке проектов:', err)
+      setProjects(data)
+      setError(null)
+    } catch (err) {
+      console.error('Ошибка при загрузке проектов:', err)
         setError(err.message || 'Не удалось загрузить проекты')
-      } finally {
-        setLoading(false)
-      }
+    } finally {
+      setLoading(false)
     }
+  }
 
     loadProjects()
   }, [filters])
@@ -134,9 +136,7 @@ const HomePage = () => {
             </p>
             <div className="flex flex-wrap gap-4">
               <button 
-                onClick={() => {
-                  filterSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                }}
+                onClick={() => setIsApartmentFinderOpen(true)}
                 className="bg-white text-primary-600 px-6 sm:px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
               >
                 Подобрать квартиру
@@ -155,36 +155,36 @@ const HomePage = () => {
       {/* Main Content */}
       <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12" ref={filterSectionRef}>
         <div className="max-w-6xl mx-auto">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">
-              Каталог новостроек
-            </h2>
-            <p className="text-gray-600">
-              Найдено проектов: {filteredProjects.length}
-            </p>
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">
+            Каталог новостроек
+          </h2>
+          <p className="text-gray-600">
+            Найдено проектов: {filteredProjects.length}
+          </p>
+        </div>
+
+        <FilterPanel onFilterChange={setFilters} />
+
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600 text-lg">Загрузка проектов...</p>
           </div>
-
-          <FilterPanel onFilterChange={setFilters} />
-
-          {loading ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600 text-lg">Загрузка проектов...</p>
-            </div>
-          ) : error ? (
-            <div className="text-center py-12">
-              <p className="text-red-600 text-lg">{error}</p>
-            </div>
-          ) : filteredProjects.length > 0 ? (
-            <div className="space-y-4">
-              {filteredProjects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-600 text-lg">По заданным фильтрам ничего не найдено</p>
-            </div>
-          )}
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-red-600 text-lg">{error}</p>
+          </div>
+        ) : filteredProjects.length > 0 ? (
+          <div className="space-y-4">
+            {filteredProjects.map((project) => (
+              <ProjectCard key={project.id} project={project} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-600 text-lg">По заданным фильтрам ничего не найдено</p>
+          </div>
+        )}
         </div>
       </section>
 
@@ -229,6 +229,18 @@ const HomePage = () => {
       <MortgageCalculator 
         isOpen={isMortgageCalculatorOpen} 
         onClose={() => setIsMortgageCalculatorOpen(false)} 
+      />
+
+      <ApartmentFinder
+        isOpen={isApartmentFinderOpen}
+        onClose={() => setIsApartmentFinderOpen(false)}
+        onApplyFilters={(newFilters) => {
+          setFilters(newFilters)
+          // Прокручиваем к секции с результатами
+          setTimeout(() => {
+            filterSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }, 100)
+        }}
       />
     </div>
   )

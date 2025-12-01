@@ -205,10 +205,10 @@ const MortgageCalculator = ({ isOpen, onClose, initialPrice = '', projectId = nu
           </div>
 
           {step === 1 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-              {/* Input Section */}
-              <div className="space-y-3 sm:space-y-4 md:space-y-5">
-                <h3 className="text-base sm:text-lg font-semibold text-gray-800">Параметры кредита</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+            {/* Input Section */}
+            <div className="space-y-3 sm:space-y-4 md:space-y-5">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-800">Параметры кредита</h3>
               
               {/* Стоимость квартиры */}
               <CustomInput
@@ -360,17 +360,17 @@ const MortgageCalculator = ({ isOpen, onClose, initialPrice = '', projectId = nu
               <p className="text-gray-600 mb-6">
                 Спасибо! Ваша заявка на ипотеку отправлена. Мы свяжемся с вами в ближайшее время.
               </p>
-              <button
+            <button
                 onClick={() => {
                   setIsSuccess(false)
                   setStep(1)
                   onClose()
                 }}
                 className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-semibold"
-              >
-                Закрыть
-              </button>
-            </div>
+            >
+              Закрыть
+            </button>
+          </div>
           ) : (
             /* Step 2: Contact Form */
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">

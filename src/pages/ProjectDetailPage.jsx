@@ -274,7 +274,7 @@ const ProjectDetailPage = () => {
 
       <CallbackModal 
         isOpen={isCallbackModalOpen} 
-        onClose={() => setIsCallbackModalOpen(false)}
+        onClose={() => setIsCallbackModalOpen(false)} 
         projectId={project?.id}
       />
 

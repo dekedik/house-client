@@ -41,9 +41,18 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Контакты</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
-              <li>+7 (495) 123-45-67</li>
-              <li>info@novostroyki.ru</li>
-              <li>Москва, ул. Примерная, д. 1</li>
+              <li>
+                <a href="tel:+79185429777" className="hover:text-white transition">
+                  +7 (918) 542-97-77
+                </a>
+              </li>
+              <li>
+                <a href="tel:+79508503306" className="hover:text-white transition">
+                  +7 (950) 850-33-06
+                </a>
+              </li>
+              <li>г. Ростов-на-Дону</li>
+              <li>ул. Михаила Нагибина, д.38</li>
             </ul>
           </div>
         </div>

@@ -111,7 +111,7 @@ const CallbackModal = ({ isOpen, onClose, projectId = null }) => {
       // Автоматически закрываем через 3 секунды
       setTimeout(() => {
         setIsSuccess(false)
-        onClose()
+      onClose()
       }, 3000)
     } catch (err) {
       console.error('Ошибка при отправке формы:', err)
@@ -176,7 +176,7 @@ const CallbackModal = ({ isOpen, onClose, projectId = null }) => {
             </div>
           ) : (
             /* Form */
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Имя */}
             <CustomInput
               label="Ваше имя"

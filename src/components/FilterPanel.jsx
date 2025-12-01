@@ -26,6 +26,7 @@ const FilterPanel = ({ onFilterChange }) => {
     { value: 'Ворошиловский район', label: 'Ворошиловский район' },
     { value: 'Пролетарский район', label: 'Пролетарский район' },
     { value: 'Область и другие регионы', label: 'Область и другие регионы' },
+    { value: 'Вторичный рынок', label: 'Вторичный рынок' },
   ]
   const housingClasses = [
     { value: '', label: 'Любой класс' },
