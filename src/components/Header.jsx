@@ -21,7 +21,7 @@ const Header = () => {
 
           <nav className="hidden md:flex items-center space-x-8">
             <Link to="/" className="text-gray-700 hover:text-primary-600 font-medium transition">
-              Новостройки
+              Дома
             </Link>
             <button 
               onClick={() => setIsAboutModalOpen(true)}
@@ -56,7 +56,7 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t">
             <Link to="/" className="block py-2 text-gray-700 hover:text-primary-600">
-              Новостройки
+              Дома
             </Link>
             <button 
               onClick={() => {
