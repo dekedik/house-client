@@ -11,9 +11,11 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">Н</span>
-            </div>
+            <img 
+              src="/logo.jpg" 
+              alt="Горизонт" 
+              className="h-10 w-10 rounded-lg object-cover"
+            />
             <span className="text-xl font-bold text-gray-800">Новостройки</span>
           </Link>
 
