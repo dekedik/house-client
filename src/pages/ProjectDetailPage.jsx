@@ -59,6 +59,22 @@ const ProjectDetailPage = () => {
     ? project.features 
     : (project.features ? (typeof project.features === 'string' ? JSON.parse(project.features) : []) : [])
 
+  // Функция для форматирования цены с пробелами между каждыми тремя цифрами
+  const formatPrice = (price) => {
+    if (!price) return price
+    
+    // Извлекаем число из строки (убираем пробелы, символы валюты и т.д.)
+    const numStr = price.toString().replace(/\s/g, '').replace(/[^\d]/g, '')
+    if (!numStr) return price
+    
+    // Форматируем число с пробелами
+    const formatted = numStr.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+    
+    // Проверяем, был ли символ валюты в исходной строке
+    const hasCurrency = price.includes('₽') || price.includes('руб')
+    return hasCurrency ? `${formatted} ₽` : formatted
+  }
+
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Breadcrumbs */}
@@ -67,10 +83,6 @@ const ProjectDetailPage = () => {
           <nav className="flex items-center space-x-2 text-sm">
             <Link to="/" className="text-gray-500 hover:text-primary-600">
               Главная
-            </Link>
-            <span className="text-gray-400">/</span>
-            <Link to="/" className="text-gray-500 hover:text-primary-600">
-              Новостройки
             </Link>
             <span className="text-gray-400">/</span>
             <span className="text-gray-800">{project.name}</span>
@@ -137,8 +149,8 @@ const ProjectDetailPage = () => {
                 <div className="space-y-4 mb-6">
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Цена от</p>
-                    <p className="text-3xl font-bold text-primary-600">{project.priceFrom}</p>
-                    <p className="text-sm text-gray-500">от {project.price} за м²</p>
+                    <p className="text-3xl font-bold text-primary-600">{formatPrice(project.priceFrom || project.price_from)}</p>
+                    <p className="text-sm text-gray-500">от {formatPrice(project.price)} за м²</p>
                   </div>
 
                   <div className="border-t pt-4">

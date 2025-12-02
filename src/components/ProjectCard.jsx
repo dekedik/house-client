@@ -7,6 +7,22 @@ const ProjectCard = ({ project }) => {
   const handleDetailsClick = () => {
     navigate(`/project/${project.id}`)
   }
+
+  // Функция для форматирования цены с пробелами между каждыми тремя цифрами
+  const formatPrice = (price) => {
+    if (!price || price === 'Не указана') return price
+    
+    // Извлекаем число из строки (убираем пробелы, символы валюты и т.д.)
+    const numStr = price.toString().replace(/\s/g, '').replace(/[^\d]/g, '')
+    if (!numStr) return price
+    
+    // Форматируем число с пробелами
+    const formatted = numStr.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+    
+    // Проверяем, был ли символ валюты в исходной строке
+    const hasCurrency = price.includes('₽') || price.includes('руб')
+    return hasCurrency ? `${formatted} ₽` : formatted
+  }
   // Обрабатываем images - может быть массивом, строкой JSON или отсутствовать
   let images = []
   if (project.images) {
@@ -49,7 +65,7 @@ const ProjectCard = ({ project }) => {
             <div>
               <p className="text-gray-500 text-base mb-1">Цена от</p>
               <p className="text-xl font-bold text-primary-600">
-                {project.priceFrom || project.price_from || 'Не указана'}
+                {formatPrice(project.priceFrom || project.price_from || 'Не указана')}
               </p>
             </div>
             <div>
