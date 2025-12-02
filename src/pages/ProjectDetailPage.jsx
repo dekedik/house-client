@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useLayoutEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { api } from '../services/api'
 import CallbackModal from '../components/CallbackModal'
@@ -14,6 +14,39 @@ const ProjectDetailPage = () => {
   const [isCallbackModalOpen, setIsCallbackModalOpen] = useState(false)
   const [isMortgageCalculatorOpen, setIsMortgageCalculatorOpen] = useState(false)
 
+  // Прокручиваем страницу вверх ДО рендеринга (useLayoutEffect выполняется синхронно)
+  useLayoutEffect(() => {
+    // Немедленная прокрутка вверх
+    window.scrollTo(0, 0)
+    if (document.documentElement) {
+      document.documentElement.scrollTop = 0
+    }
+    if (document.body) {
+      document.body.scrollTop = 0
+    }
+  }, [id])
+
+  // Дополнительная прокрутка после рендеринга
+  useEffect(() => {
+    const scrollToTop = () => {
+      window.scrollTo(0, 0)
+      if (document.documentElement) {
+        document.documentElement.scrollTop = 0
+      }
+      if (document.body) {
+        document.body.scrollTop = 0
+      }
+    }
+    
+    // Прокрутка сразу и после задержек для надежности на мобильных
+    scrollToTop()
+    setTimeout(scrollToTop, 0)
+    setTimeout(scrollToTop, 50)
+    setTimeout(scrollToTop, 100)
+    setTimeout(scrollToTop, 200)
+    setTimeout(scrollToTop, 300)
+  }, [id])
+
   useEffect(() => {
     loadProject()
   }, [id])
@@ -24,11 +57,25 @@ const ProjectDetailPage = () => {
       const data = await api.getProjectById(id)
       setProject(data)
       setError(null)
+      
+      // Прокручиваем вверх после загрузки данных
+      setTimeout(() => {
+        window.scrollTo(0, 0)
+        document.documentElement.scrollTop = 0
+        document.body.scrollTop = 0
+      }, 0)
     } catch (err) {
       console.error('Ошибка при загрузке проекта:', err)
       setError('Проект не найден')
     } finally {
       setLoading(false)
+      
+      // Прокручиваем вверх после завершения загрузки
+      setTimeout(() => {
+        window.scrollTo(0, 0)
+        document.documentElement.scrollTop = 0
+        document.body.scrollTop = 0
+      }, 0)
     }
   }
 

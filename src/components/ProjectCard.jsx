@@ -1,8 +1,11 @@
-import React from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const ProjectCard = ({ project }) => {
   const navigate = useNavigate()
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const touchStartX = useRef(0)
+  const touchEndX = useRef(0)
 
   const handleDetailsClick = () => {
     navigate(`/project/${project.id}`)
@@ -23,6 +26,7 @@ const ProjectCard = ({ project }) => {
     const hasCurrency = price.includes('₽') || price.includes('руб')
     return hasCurrency ? `${formatted} ₽` : formatted
   }
+  
   // Обрабатываем images - может быть массивом, строкой JSON или отсутствовать
   let images = []
   if (project.images) {
@@ -46,12 +50,258 @@ const ProjectCard = ({ project }) => {
   const sideImage = images[1] || null // Одно изображение справа
   const bottomImage = images[2] || null // Изображение под основным
   const hasMoreImages = images.length > 3
+  const currentImage = images[currentImageIndex] || mainImage
+
+  // Сбрасываем индекс при изменении проекта
+  useEffect(() => {
+    setCurrentImageIndex(0)
+  }, [project.id])
+
+  // Поддержка клавиатурной навигации для десктопа
+  useEffect(() => {
+    if (images.length <= 1) return
+    
+    const handleKeyPress = (e) => {
+      if (e.key === 'ArrowLeft') {
+        setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+      } else if (e.key === 'ArrowRight') {
+        setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [images.length])
+
+  const handlePrevImage = (e) => {
+    e.stopPropagation()
+    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+  }
+
+  const handleNextImage = (e) => {
+    e.stopPropagation()
+    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+  }
+
+  const handleDotClick = (index, e) => {
+    e.stopPropagation()
+    setCurrentImageIndex(index)
+  }
+
+  // Обработка свайпа для мобильных устройств
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX
+  }
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.touches[0].clientX
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return
+    
+    const distance = touchStartX.current - touchEndX.current
+    const minSwipeDistance = 50
+
+    if (distance > minSwipeDistance) {
+      // Свайп влево - следующее изображение
+      setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+    } else if (distance < -minSwipeDistance) {
+      // Свайп вправо - предыдущее изображение
+      setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+    }
+
+    touchStartX.current = 0
+    touchEndX.current = 0
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200">
-      <div className="flex flex-col md:flex-row">
-        {/* Блок с информацией */}
-        <div className="flex-1 p-4 md:p-6 flex flex-col">
+      <div className="flex flex-col md:flex-row md:items-stretch">
+        {/* Блок с изображениями - первым в мобильной версии */}
+        {mainImage && (
+          <div className="md:w-2/5 flex-shrink-0 p-2 md:p-4 flex items-stretch order-1 md:order-2">
+            {/* Мобильный слайдер */}
+            {images.length > 1 ? (
+              <div className="md:hidden relative rounded-lg overflow-hidden w-full" style={{ height: '192px' }}>
+                <div 
+                  className="relative w-full h-full"
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  style={{ height: '192px', width: '100%' }}
+                >
+                  <img
+                    src={currentImage}
+                    alt={`${project.name} ${currentImageIndex + 1}`}
+                    className="select-none"
+                    style={{ width: '100%', height: '192px', objectFit: 'cover', display: 'block' }}
+                    draggable={false}
+                  />
+                  {project.status && (
+                    <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium z-10">
+                      {project.status}
+                    </span>
+                  )}
+                  {project.discount && (
+                    <span className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium z-10">
+                      {project.discount}
+                    </span>
+                  )}
+                  
+                  {/* Кнопки навигации */}
+                  {images.length > 1 && (
+                    <>
+                      <button
+                        onClick={handlePrevImage}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition z-10"
+                        aria-label="Предыдущее изображение"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={handleNextImage}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition z-10"
+                        aria-label="Следующее изображение"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                  
+                  {/* Индикаторы (точки) */}
+                  {images.length > 1 && (
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                      {images.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={(e) => handleDotClick(index, e)}
+                          className={`w-2 h-2 rounded-full transition ${
+                            index === currentImageIndex
+                              ? 'bg-white'
+                              : 'bg-white bg-opacity-50'
+                          }`}
+                          aria-label={`Перейти к изображению ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="md:hidden relative rounded-lg overflow-hidden w-full" style={{ height: '192px' }}>
+                <img
+                  src={mainImage}
+                  alt={project.name}
+                  style={{ width: '100%', height: '192px', objectFit: 'cover', display: 'block' }}
+                />
+                {project.status && (
+                  <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium">
+                    {project.status}
+                  </span>
+                )}
+                {project.discount && (
+                  <span className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                    {project.discount}
+                  </span>
+                )}
+              </div>
+            )}
+            
+            {/* Десктопная версия - слайдер */}
+            {images.length > 1 ? (
+              <div className="hidden md:block relative rounded-lg overflow-hidden w-full h-full">
+                <div className="relative w-full h-full">
+                  <img
+                    src={currentImage}
+                    alt={`${project.name} ${currentImageIndex + 1}`}
+                    className="select-none w-full h-full"
+                    style={{ objectFit: 'cover', display: 'block' }}
+                    draggable={false}
+                  />
+                  {project.status && (
+                    <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium z-10">
+                      {project.status}
+                    </span>
+                  )}
+                  {project.discount && (
+                    <span className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium z-10">
+                      {project.discount}
+                    </span>
+                  )}
+                  
+                  {/* Кнопки навигации */}
+                  {images.length > 1 && (
+                    <>
+                      <button
+                        onClick={handlePrevImage}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition z-10"
+                        aria-label="Предыдущее изображение"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={handleNextImage}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition z-10"
+                        aria-label="Следующее изображение"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                  
+                  {/* Индикаторы (точки) */}
+                  {images.length > 1 && (
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                      {images.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={(e) => handleDotClick(index, e)}
+                          className={`w-2 h-2 rounded-full transition ${
+                            index === currentImageIndex
+                              ? 'bg-white'
+                              : 'bg-white bg-opacity-50'
+                          }`}
+                          aria-label={`Перейти к изображению ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="hidden md:block relative rounded-lg overflow-hidden w-full h-full">
+                <img
+                  src={mainImage}
+                  alt={project.name}
+                  className="w-full h-full"
+                  style={{ objectFit: 'cover', display: 'block' }}
+                />
+                {project.status && (
+                  <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium">
+                    {project.status}
+                  </span>
+                )}
+                {project.discount && (
+                  <span className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                    {project.discount}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* Блок с информацией - вторым в мобильной версии */}
+        <div className="flex-1 p-4 md:p-6 flex flex-col order-2 md:order-1">
           <div className="flex items-start justify-between mb-2">
             <div className="flex-1">
               <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-1">{project.name}</h3>
@@ -95,43 +345,6 @@ const ProjectCard = ({ project }) => {
             </button>
           </div>
         </div>
-        
-        {/* Блок с изображениями */}
-        {mainImage && (
-          <div className="md:w-2/5 flex-shrink-0 p-2 md:p-4">
-            <div className="relative grid grid-cols-3 gap-1 h-48 md:h-full md:min-h-[200px] overflow-hidden rounded-lg">
-              {/* Большое основное изображение */}
-              <div className={`${sideImage ? "col-span-2" : "col-span-3"} relative overflow-hidden`}>
-                <img
-                  src={mainImage}
-                  alt={project.name}
-                  className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                />
-                {project.status && (
-                  <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium">
-                    {project.status}
-                  </span>
-                )}
-                {project.discount && (
-                  <span className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                    {project.discount}
-                  </span>
-                )}
-              </div>
-              
-              {/* Правая колонка с одним изображением */}
-              {sideImage && (
-                <div className="col-span-1 relative overflow-hidden">
-                  <img
-                    src={sideImage}
-                    alt={`${project.name} 2`}
-                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )
