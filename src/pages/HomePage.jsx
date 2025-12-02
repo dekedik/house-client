@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import FilterPanel from '../components/FilterPanel'
 import ProjectCard from '../components/ProjectCard'
 import MortgageCalculator from '../components/MortgageCalculator'
 import { api } from '../services/api'
 
 const HomePage = () => {
+  const location = useLocation()
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -20,6 +22,17 @@ const HomePage = () => {
   })
   const [isMortgageCalculatorOpen, setIsMortgageCalculatorOpen] = useState(false)
   const filterSectionRef = useRef(null)
+
+  // Применяем фильтры из state при навигации (например, из Footer)
+  useEffect(() => {
+    if (location.state?.filters) {
+      setFilters(location.state.filters)
+      // Прокручиваем к секции с фильтрами
+      setTimeout(() => {
+        filterSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 100)
+    }
+  }, [location.state])
 
   useEffect(() => {
     loadProjects()
@@ -179,7 +192,7 @@ const HomePage = () => {
           </p>
         </div>
 
-        <FilterPanel onFilterChange={setFilters} />
+        <FilterPanel onFilterChange={setFilters} initialFilters={filters} />
 
         {loading ? (
           <div className="text-center py-12">

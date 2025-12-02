@@ -23,10 +23,15 @@ const FilterPanel = ({ onFilterChange, initialFilters = null }) => {
         const hasChanges = Object.keys(initialFilters).some(
           key => prevFilters[key] !== initialFilters[key]
         )
-        return hasChanges ? initialFilters : prevFilters
+        if (hasChanges) {
+          // Обновляем фильтры и уведомляем родителя
+          onFilterChange(initialFilters)
+          return initialFilters
+        }
+        return prevFilters
       })
     }
-  }, [initialFilters])
+  }, [initialFilters, onFilterChange])
 
   const districts = [
     { value: '', label: 'Все районы' },

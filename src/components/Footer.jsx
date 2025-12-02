@@ -65,7 +65,7 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Компания</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
-              <li><Link to="/" className="hover:text-white transition">О нас</Link></li>
+              <li><Link to="/about" className="hover:text-white transition">О нас</Link></li>
               
             </ul>
           </div>
