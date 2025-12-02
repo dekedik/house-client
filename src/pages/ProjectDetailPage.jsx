@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react'
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { api } from '../services/api'
 import CallbackModal from '../components/CallbackModal'
@@ -13,6 +13,8 @@ const ProjectDetailPage = () => {
   const [selectedImage, setSelectedImage] = useState(0)
   const [isCallbackModalOpen, setIsCallbackModalOpen] = useState(false)
   const [isMortgageCalculatorOpen, setIsMortgageCalculatorOpen] = useState(false)
+  const touchStartX = useRef(0)
+  const touchEndX = useRef(0)
 
   // Прокручиваем страницу вверх ДО рендеринга (useLayoutEffect выполняется синхронно)
   useLayoutEffect(() => {
@@ -51,6 +53,33 @@ const ProjectDetailPage = () => {
     loadProject()
   }, [id])
 
+  // Сбрасываем индекс при изменении проекта
+  useEffect(() => {
+    setSelectedImage(0)
+  }, [id])
+
+  // Поддержка клавиатурной навигации для слайдера
+  useEffect(() => {
+    if (!project?.images) return
+    
+    const projectImages = Array.isArray(project.images) 
+      ? project.images 
+      : (project.images ? (typeof project.images === 'string' ? JSON.parse(project.images) : []) : [])
+    
+    if (projectImages.length <= 1) return
+    
+    const handleKeyPress = (e) => {
+      if (e.key === 'ArrowLeft') {
+        setSelectedImage((prev) => (prev === 0 ? projectImages.length - 1 : prev - 1))
+      } else if (e.key === 'ArrowRight') {
+        setSelectedImage((prev) => (prev === projectImages.length - 1 ? 0 : prev + 1))
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [project?.images])
+
   const loadProject = async () => {
     try {
       setLoading(true)
@@ -79,6 +108,41 @@ const ProjectDetailPage = () => {
     }
   }
 
+  // Получаем images и features (уже распарсены в API, но проверяем для обратной совместимости)
+  const projectImages = project && (Array.isArray(project.images) 
+    ? project.images 
+    : (project.images ? (typeof project.images === 'string' ? JSON.parse(project.images) : []) : []))
+  const projectFeatures = project && (Array.isArray(project.features) 
+    ? project.features 
+    : (project.features ? (typeof project.features === 'string' ? JSON.parse(project.features) : []) : []))
+
+  // Обработка свайпа для слайдера изображений
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX
+  }
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.touches[0].clientX
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current || !projectImages || projectImages.length <= 1) return
+    
+    const distance = touchStartX.current - touchEndX.current
+    const minSwipeDistance = 50
+
+    if (distance > minSwipeDistance) {
+      // Свайп влево - следующее изображение
+      setSelectedImage((prev) => (prev === projectImages.length - 1 ? 0 : prev + 1))
+    } else if (distance < -minSwipeDistance) {
+      // Свайп вправо - предыдущее изображение
+      setSelectedImage((prev) => (prev === 0 ? projectImages.length - 1 : prev - 1))
+    }
+
+    touchStartX.current = 0
+    touchEndX.current = 0
+  }
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-12 text-center">
@@ -97,14 +161,6 @@ const ProjectDetailPage = () => {
       </div>
     )
   }
-
-  // Получаем images и features (уже распарсены в API, но проверяем для обратной совместимости)
-  const projectImages = Array.isArray(project.images) 
-    ? project.images 
-    : (project.images ? (typeof project.images === 'string' ? JSON.parse(project.images) : []) : [])
-  const projectFeatures = Array.isArray(project.features) 
-    ? project.features 
-    : (project.features ? (typeof project.features === 'string' ? JSON.parse(project.features) : []) : [])
 
   // Функция для форматирования цены с пробелами между каждыми тремя цифрами
   const formatPrice = (price) => {
@@ -126,7 +182,7 @@ const ProjectDetailPage = () => {
     <div className="bg-gray-50 min-h-screen">
       {/* Breadcrumbs */}
       <div className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4 max-w-4xl">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <nav className="flex items-center space-x-2 text-sm">
             <Link to="/" className="text-gray-500 hover:text-primary-600">
               Главная
@@ -139,22 +195,85 @@ const ProjectDetailPage = () => {
 
       {/* Main Image Section */}
       <section className="bg-white">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <div className="relative h-96 rounded-xl overflow-hidden mb-4">
-                <img
-                  src={projectImages[selectedImage] || project.image}
-                  alt={project.name}
-                  className="w-full h-full object-cover"
-                />
+              <div 
+                className="relative h-96 rounded-xl overflow-hidden mb-4"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
+                {projectImages.length > 0 ? (
+                  <>
+                    <img
+                      src={projectImages[selectedImage] || project.image}
+                      alt={project.name}
+                      className="w-full h-full object-cover select-none"
+                      draggable={false}
+                    />
+                    
+                    {/* Кнопки навигации слайдера */}
+                    {projectImages.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setSelectedImage((prev) => (prev === 0 ? projectImages.length - 1 : prev - 1))
+                          }}
+                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-70 transition z-10"
+                          aria-label="Предыдущее изображение"
+                        >
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedImage((prev) => (prev === projectImages.length - 1 ? 0 : prev + 1))
+                          }}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-70 transition z-10"
+                          aria-label="Следующее изображение"
+                        >
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      </>
+                    )}
+                    
+                    {/* Индикаторы (точки) */}
+                    {projectImages.length > 1 && (
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                        {projectImages.map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setSelectedImage(index)}
+                            className={`w-3 h-3 rounded-full transition ${
+                              index === selectedImage
+                                ? 'bg-white'
+                                : 'bg-white bg-opacity-50'
+                            }`}
+                            aria-label={`Перейти к изображению ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <img
+                    src={project.image}
+                    alt={project.name}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+                
                 {project.status && (
-                  <span className="absolute top-4 left-4 bg-primary-600 text-white px-4 py-2 rounded-full text-sm font-medium">
+                  <span className="absolute top-4 left-4 bg-primary-600 text-white px-4 py-2 rounded-full text-sm font-medium z-10">
                     {project.status}
                   </span>
                 )}
                 {project.discount && (
-                  <span className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-full text-sm font-medium">
+                  <span className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-full text-sm font-medium z-10">
                     {project.discount}
                   </span>
                 )}

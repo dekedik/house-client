@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
-import { useLocation } from 'react-router-dom'
 import FilterPanel from '../components/FilterPanel'
 import ProjectCard from '../components/ProjectCard'
 import MortgageCalculator from '../components/MortgageCalculator'
-import ApartmentFinder from '../components/ApartmentFinder'
 import { api } from '../services/api'
 
 const HomePage = () => {
-  const location = useLocation()
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -22,58 +19,30 @@ const HomePage = () => {
     priceFromMax: '',
   })
   const [isMortgageCalculatorOpen, setIsMortgageCalculatorOpen] = useState(false)
-  const [isApartmentFinderOpen, setIsApartmentFinderOpen] = useState(false)
   const filterSectionRef = useRef(null)
 
-  // Применяем фильтры из state при навигации
   useEffect(() => {
-    if (location.state?.filters) {
-      setFilters(location.state.filters)
-      // Прокручиваем к секции с фильтрами
-      setTimeout(() => {
-        filterSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }, 100)
-    }
-  }, [location.state])
+    loadProjects()
+  }, [])
 
-  // Загрузка проектов при монтировании и при изменении фильтров
+  // Перезагрузка при изменении фильтров
   useEffect(() => {
+    loadProjects()
+  }, [filters])
+
   const loadProjects = async () => {
     try {
       setLoading(true)
-        
-        // Преобразуем фильтры для API
-        // API ожидает priceMin/priceMax, но в компоненте используются priceFromMin/priceFromMax
-        const apiFilters = {
-          district: filters.district && filters.district !== 'Вторичный рынок' ? filters.district : undefined,
-          status: filters.status || undefined,
-          type: filters.type || undefined,
-          areaMin: filters.areaMin || undefined,
-          areaMax: filters.areaMax || undefined,
-          priceMin: filters.priceFromMin || undefined,
-          priceMax: filters.priceFromMax || undefined,
-        }
-        
-        // Удаляем undefined значения
-        Object.keys(apiFilters).forEach(key => {
-          if (apiFilters[key] === undefined || apiFilters[key] === '') {
-            delete apiFilters[key]
-          }
-        })
-        
-        const data = await api.getProjects(apiFilters)
+      const data = await api.getProjects(filters)
       setProjects(data)
       setError(null)
     } catch (err) {
       console.error('Ошибка при загрузке проектов:', err)
-        setError(err.message || 'Не удалось загрузить проекты')
+      setError('Не удалось загрузить проекты')
     } finally {
       setLoading(false)
     }
   }
-
-    loadProjects()
-  }, [filters])
 
   // Функция для определения класса жилья по цене
   const getHousingClass = (price) => {
@@ -96,21 +65,21 @@ const HomePage = () => {
     return match ? parseInt(match[1]) : Infinity
   }
 
-  // Фильтрация на клиенте только для фильтров, которые не поддерживаются API
-  // (housingClass и housingType - эти фильтры применяются на клиенте)
-  // Остальные фильтры (district, status, areaMin, areaMax, priceFromMin, priceFromMax) 
-  // уже применяются на сервере через API
+  // Фильтрация на клиенте для сложных фильтров (класс жилья, тип жилья)
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
-      // Фильтр по классу жилья (только клиентская фильтрация)
+      // Фильтр по району
+      if (filters.district && project.district !== filters.district) return false
+
+      // Фильтр по классу жилья
       if (filters.housingClass) {
         const projectClass = getHousingClass(project.price)
         if (projectClass !== filters.housingClass) return false
       }
 
-      // Фильтр по типу жилья (только клиентская фильтрация)
+      // Фильтр по типу жилья
       if (filters.housingType) {
-        const projectRooms = project.rooms || ''
+        const projectRooms = project.rooms
         // Проверяем соответствие типа жилья
         if (filters.housingType === 'Студия' && !projectRooms.includes('Студия')) return false
         if (filters.housingType === '1 спальня' && !projectRooms.includes('1')) return false
@@ -119,9 +88,41 @@ const HomePage = () => {
         if (filters.housingType === 'Более 4 спален' && !projectRooms.includes('4') && !projectRooms.includes('5')) return false
       }
 
+      // Фильтр по статусу
+      if (filters.status && project.status !== filters.status) return false
+
+      // Фильтр по площади
+      if (filters.areaMin || filters.areaMax) {
+        const minArea = getMinArea(project.area)
+        const maxArea = getMaxArea(project.area)
+        
+        if (filters.areaMin) {
+          const filterMinArea = parseInt(filters.areaMin)
+          if (maxArea < filterMinArea) return false
+        }
+        if (filters.areaMax) {
+          const filterMaxArea = parseInt(filters.areaMax)
+          if (minArea > filterMaxArea) return false
+        }
+      }
+
+      // Фильтр по цене от
+      if (filters.priceFromMin || filters.priceFromMax) {
+        const priceFrom = parseInt(project.priceFrom.replace(/\s/g, '').replace('₽', ''))
+        
+        if (filters.priceFromMin) {
+          const filterMinPrice = parseInt(filters.priceFromMin)
+          if (priceFrom < filterMinPrice) return false
+        }
+        if (filters.priceFromMax) {
+          const filterMaxPrice = parseInt(filters.priceFromMax)
+          if (priceFrom > filterMaxPrice) return false
+        }
+      }
+
       return true
     })
-  }, [projects, filters.housingClass, filters.housingType])
+  }, [filters])
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -135,28 +136,30 @@ const HomePage = () => {
           }}
         >
           {/* Overlay для читаемости текста */}
-          <div className="absolute inset-0 bg-gradient-to-r from-primary-800/95 to-primary-900/95"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-primary-600/90 to-primary-800/90"></div>
         </div>
         
         {/* Content */}
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-6xl mx-auto">
+        <div className="relative z-10 container mx-auto px-4">
+          <div className="max-w-3xl">
             <h1 className="text-4xl sm:text-5xl font-bold mb-6">
               Квартиры в новостройках
             </h1>
-            <p className="text-lg sm:text-xl mb-8 text-gray-100">
+            <p className="text-lg sm:text-xl mb-8 text-primary-100">
               Более 1000 квартир в лучших жилых комплексах. Выгодные условия покупки и рассрочка до 20 лет.
             </p>
             <div className="flex flex-wrap gap-4">
               <button 
-                onClick={() => setIsApartmentFinderOpen(true)}
-                className="bg-accent-400 text-white px-6 sm:px-8 py-3 rounded-lg font-semibold hover:bg-accent-500 transition shadow-lg"
+                onClick={() => {
+                  filterSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }}
+                className="bg-white text-primary-600 px-6 sm:px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
               >
                 Подобрать квартиру
               </button>
               <button 
                 onClick={() => setIsMortgageCalculatorOpen(true)}
-                className="border-2 border-white text-white px-6 sm:px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary-800 transition"
+                className="border-2 border-white text-white px-6 sm:px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary-600 transition"
               >
                 Рассчитать ипотеку
               </button>
@@ -166,16 +169,17 @@ const HomePage = () => {
       </section>
 
       {/* Main Content */}
-      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12" ref={filterSectionRef}>
-        <div className="max-w-6xl mx-auto">
+      <section className="container mx-auto px-4 py-12" ref={filterSectionRef}>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-800 mb-2">
             Каталог новостроек
           </h2>
-          
+          <p className="text-gray-600">
+            Найдено проектов: {filteredProjects.length}
+          </p>
         </div>
 
-        <FilterPanel onFilterChange={setFilters} initialFilters={filters} />
+        <FilterPanel onFilterChange={setFilters} />
 
         {loading ? (
           <div className="text-center py-12">
@@ -196,7 +200,6 @@ const HomePage = () => {
             <p className="text-gray-600 text-lg">По заданным фильтрам ничего не найдено</p>
           </div>
         )}
-        </div>
       </section>
 
       {/* Benefits Section */}
@@ -207,8 +210,8 @@ const HomePage = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
@@ -216,8 +219,8 @@ const HomePage = () => {
               <p className="text-gray-600">Все документы проверены, сделки проходят через эскроу-счета</p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -225,8 +228,8 @@ const HomePage = () => {
               <p className="text-gray-600">Прямые договоры с застройщиками, без переплат и комиссий</p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
@@ -240,18 +243,6 @@ const HomePage = () => {
       <MortgageCalculator 
         isOpen={isMortgageCalculatorOpen} 
         onClose={() => setIsMortgageCalculatorOpen(false)} 
-      />
-
-      <ApartmentFinder
-        isOpen={isApartmentFinderOpen}
-        onClose={() => setIsApartmentFinderOpen(false)}
-        onApplyFilters={(newFilters) => {
-          setFilters(newFilters)
-          // Прокручиваем к секции с результатами
-          setTimeout(() => {
-            filterSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-          }, 100)
-        }}
       />
     </div>
   )
