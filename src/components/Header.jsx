@@ -1,10 +1,23 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import CallbackModal from './CallbackModal'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCallbackModalOpen, setIsCallbackModalOpen] = useState(false)
+
+  // Блокируем прокрутку страницы когда меню открыто
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    // Очистка при размонтировании
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isMenuOpen])
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
@@ -54,34 +67,63 @@ const Header = () => {
         </div>
 
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t">
-            <Link to="/" className="block py-2 text-gray-700 hover:text-primary-600">
-              Дома
-            </Link>
-            <Link 
-              to="/about"
+          <>
+            {/* Затемнение фона */}
+            <div 
+              className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
               onClick={() => setIsMenuOpen(false)}
-              className="block py-2 text-gray-700 hover:text-primary-600"
-            >
-              О компании
-            </Link>
-            <Link 
-              to="/contacts"
-              onClick={() => setIsMenuOpen(false)}
-              className="block py-2 text-gray-700 hover:text-primary-600"
-            >
-              Контакты
-            </Link>
-            <button 
-              onClick={() => {
-                setIsCallbackModalOpen(true)
-                setIsMenuOpen(false)
-              }}
-              className="mt-4 w-full bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition"
-            >
-              Заказать звонок
-            </button>
-          </div>
+            />
+            {/* Мобильное меню на всю страницу */}
+            <div className="fixed inset-0 bg-white z-50 md:hidden overflow-y-auto">
+              <div className="container mx-auto px-4 py-6">
+                {/* Кнопка закрытия */}
+                <div className="flex justify-end mb-8">
+                  <button
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-gray-700 hover:text-gray-900"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                
+                {/* Навигация */}
+                <nav className="flex flex-col space-y-6">
+                  <Link 
+                    to="/" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-2xl font-semibold text-gray-800 hover:text-primary-600 transition"
+                  >
+                    Дома
+                  </Link>
+                  <Link 
+                    to="/about"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-2xl font-semibold text-gray-800 hover:text-primary-600 transition"
+                  >
+                    О компании
+                  </Link>
+                  <Link 
+                    to="/contacts"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-2xl font-semibold text-gray-800 hover:text-primary-600 transition"
+                  >
+                    Контакты
+                  </Link>
+                  <button 
+                    onClick={() => {
+                      setIsCallbackModalOpen(true)
+                      setIsMenuOpen(false)
+                    }}
+                    className="mt-8 w-full bg-primary-600 text-white px-6 py-4 rounded-lg hover:bg-primary-700 transition text-lg font-semibold"
+                  >
+                    Заказать звонок
+                  </button>
+                </nav>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
