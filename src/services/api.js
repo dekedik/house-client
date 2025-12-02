@@ -1,5 +1,7 @@
+import { config } from '../config'
+
 // Базовый URL API
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const API_URL = config.apiUrl
 
 // Функция для парсинга JSON полей (images, features)
 const parseJsonField = (field) => {
@@ -59,7 +61,7 @@ export const api = {
     if (filters.priceMax) params.append('priceMax', filters.priceMax)
 
     const queryString = params.toString()
-    const url = `${API_URL}/api/v1/projects${queryString ? `?${queryString}` : ''}`
+    const url = `${API_URL}/v1/projects${queryString ? `?${queryString}` : ''}`
 
     try {
       const response = await fetch(url, {
@@ -100,7 +102,7 @@ export const api = {
    * @returns {Promise<Object>} Объект проекта
    */
   async getProjectById(id) {
-    const url = `${API_URL}/api/v1/projects/${id}`
+    const url = `${API_URL}/v1/projects/${id}`
 
     try {
       const response = await fetch(url, {
@@ -147,7 +149,7 @@ export const api = {
    * @returns {Promise<Object>} Ответ сервера
    */
   async submitCallback(data) {
-    const url = `${API_URL}/api/v1/callbacks`
+    const url = `${API_URL}/v1/callbacks`
 
     try {
       const requestBody = {
