@@ -18,15 +18,23 @@ const parseJsonField = (field) => {
   return field
 }
 
-// Функция для обработки проекта - парсинг JSON полей
+// Функция для обработки проекта - парсинг JSON полей и нормализация названий полей
 const processProject = (project) => {
   if (!project) return project
+  
+  // Нормализуем названия полей (snake_case -> camelCase)
+  if (project.price_from && !project.priceFrom) {
+    project.priceFrom = project.price_from
+  }
+  if (project.full_description && !project.fullDescription) {
+    project.fullDescription = project.full_description
+  }
   
   // Парсим images
   if (project.images) {
     project.images = parseJsonField(project.images) || []
-    }
-
+  }
+  
   // Парсим features
   if (project.features) {
     project.features = parseJsonField(project.features) || []

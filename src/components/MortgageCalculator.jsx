@@ -59,11 +59,13 @@ const MortgageCalculator = ({ isOpen, onClose, initialPrice = '', projectId = nu
     const totalPayment = monthlyPayment * months
     const overpayment = totalPayment - loanAmount
 
+    const MAX_VALUE = 500000000 // Максимальное значение для отображения
+
     return {
-      loanAmount,
-      monthlyPayment: Math.round(monthlyPayment),
-      totalPayment: Math.round(totalPayment),
-      overpayment: Math.round(overpayment),
+      loanAmount: Math.min(loanAmount, MAX_VALUE),
+      monthlyPayment: Math.min(Math.round(monthlyPayment), MAX_VALUE),
+      totalPayment: Math.min(Math.round(totalPayment), MAX_VALUE),
+      overpayment: Math.min(Math.round(overpayment), MAX_VALUE),
     }
   }, [formData])
 

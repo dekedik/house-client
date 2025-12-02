@@ -48,7 +48,9 @@ const ProjectCard = ({ project }) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
             <div>
               <p className="text-gray-500 text-base mb-1">Цена от</p>
-              <p className="text-xl font-bold text-primary-600">{project.priceFrom}</p>
+              <p className="text-xl font-bold text-primary-600">
+                {project.priceFrom || project.price_from || 'Не указана'}
+              </p>
             </div>
             <div>
               <p className="text-gray-500 text-base mb-1">Срок сдачи</p>
@@ -80,8 +82,8 @@ const ProjectCard = ({ project }) => {
         
         {/* Блок с изображениями */}
         {mainImage && (
-          <div className="md:w-2/5 flex-shrink-0">
-            <div className="relative grid grid-cols-3 gap-1 h-48 md:h-full md:min-h-[200px] overflow-hidden">
+          <div className="md:w-2/5 flex-shrink-0 p-2 md:p-4">
+            <div className="relative grid grid-cols-3 gap-1 h-48 md:h-full md:min-h-[200px] overflow-hidden rounded-lg">
               {/* Большое основное изображение */}
               <div className={`${sideImage ? "col-span-2" : "col-span-3"} relative overflow-hidden`}>
                 <img
@@ -112,22 +114,6 @@ const ProjectCard = ({ project }) => {
                 </div>
               )}
             </div>
-            
-            {/* Изображение под основным (если есть) */}
-            {bottomImage && (
-              <div className="relative h-24 overflow-hidden">
-                <img
-                  src={bottomImage}
-                  alt={`${project.name} 3`}
-                  className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                />
-                {hasMoreImages && (
-                  <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                    <span className="text-white font-semibold text-xs uppercase">Показать еще</span>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         )}
       </div>
