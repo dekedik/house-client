@@ -7,5 +7,8 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
   },
+  define: {
+    'import.meta.env.API_URL': JSON.stringify(process.env.API_URL || process.env.VITE_API_URL || ''),
+  },
 })
 
