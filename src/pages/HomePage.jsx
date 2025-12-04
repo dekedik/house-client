@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useLocation } from 'react-router-dom'
 import FilterPanel from '../components/FilterPanel'
 import ProjectCard from '../components/ProjectCard'
@@ -34,28 +34,25 @@ const HomePage = () => {
     }
   }, [location.state])
 
-  useEffect(() => {
-    loadProjects()
-  }, [])
-
-  // Перезагрузка при изменении фильтров
-  useEffect(() => {
-    loadProjects()
-  }, [filters])
-
-  const loadProjects = async () => {
+  const loadProjects = useCallback(async () => {
     try {
       setLoading(true)
       const data = await api.getProjects(filters)
-      setProjects(data)
+      setProjects(data || [])
       setError(null)
     } catch (err) {
       console.error('Ошибка при загрузке проектов:', err)
       setError('Не удалось загрузить проекты')
+      setProjects([])
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters])
+
+  // Загрузка проектов при изменении фильтров (включая первую загрузку)
+  useEffect(() => {
+    loadProjects()
+  }, [loadProjects])
 
   // Функция для определения класса жилья по цене
   const getHousingClass = (price) => {
@@ -135,7 +132,7 @@ const HomePage = () => {
 
       return true
     })
-  }, [filters])
+  }, [filters, projects])
 
   return (
     <div className="bg-gray-50 min-h-screen">

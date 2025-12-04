@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import MoreFiltersModal from './MoreFiltersModal'
 import CustomSelect from './CustomSelect'
 
@@ -14,24 +14,31 @@ const FilterPanel = ({ onFilterChange, initialFilters = null }) => {
     priceFromMax: '',
   })
   const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false)
+  const isInitialMount = useRef(true)
 
   // Синхронизируем фильтры с пропсами, если они переданы
   useEffect(() => {
     if (initialFilters) {
-      setFilters(prevFilters => {
-        // Обновляем только если фильтры действительно изменились
-        const hasChanges = Object.keys(initialFilters).some(
-          key => prevFilters[key] !== initialFilters[key]
-        )
-        if (hasChanges) {
-          // Обновляем фильтры и уведомляем родителя
-          onFilterChange(initialFilters)
-          return initialFilters
-        }
-        return prevFilters
-      })
+      // При первой загрузке всегда синхронизируем
+      if (isInitialMount.current) {
+        setFilters(initialFilters)
+        isInitialMount.current = false
+      } else {
+        // Проверяем, есть ли реальные изменения
+        setFilters(prevFilters => {
+          const hasChanges = Object.keys(initialFilters).some(
+            key => prevFilters[key] !== initialFilters[key]
+          )
+          if (hasChanges) {
+            return initialFilters
+          }
+          return prevFilters
+        })
+      }
+    } else {
+      isInitialMount.current = false
     }
-  }, [initialFilters, onFilterChange])
+  }, [initialFilters])
 
   const districts = [
     { value: '', label: 'Все районы' },
