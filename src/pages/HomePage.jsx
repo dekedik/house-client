@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useLocation } from 'react-router-dom'
 import FilterPanel from '../components/FilterPanel'
 import ProjectCard from '../components/ProjectCard'
+import ProjectCardSkeleton from '../components/ProjectCardSkeleton'
+import ApartmentFinder from '../components/ApartmentFinder'
 import MortgageCalculator from '../components/MortgageCalculator'
 import { api } from '../services/api'
 
@@ -21,6 +23,7 @@ const HomePage = () => {
     priceFromMax: '',
   })
   const [isMortgageCalculatorOpen, setIsMortgageCalculatorOpen] = useState(false)
+  const [isApartmentFinderOpen, setIsApartmentFinderOpen] = useState(false)
   const filterSectionRef = useRef(null)
 
   // Применяем фильтры из state при навигации (например, из Footer)
@@ -160,9 +163,7 @@ const HomePage = () => {
             </p>
             <div className="flex flex-wrap gap-4">
               <button 
-                onClick={() => {
-                  filterSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                }}
+                onClick={() => setIsApartmentFinderOpen(true)}
                 className="bg-white text-primary-600 px-6 sm:px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
               >
                 Подобрать квартиру
@@ -184,16 +185,15 @@ const HomePage = () => {
           <h2 className="text-3xl font-bold text-gray-800 mb-2">
             Каталог новостроек
           </h2>
-          <p className="text-gray-600">
-            Найдено проектов: {filteredProjects.length}
-          </p>
         </div>
 
         <FilterPanel onFilterChange={setFilters} initialFilters={filters} />
 
         {loading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">Загрузка проектов...</p>
+          <div className="space-y-4">
+            {[...Array(3)].map((_, index) => (
+              <ProjectCardSkeleton key={index} />
+            ))}
           </div>
         ) : error ? (
           <div className="text-center py-12">
@@ -249,6 +249,17 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      <ApartmentFinder
+        isOpen={isApartmentFinderOpen}
+        onClose={() => setIsApartmentFinderOpen(false)}
+        onApplyFilters={(filters) => {
+          setFilters(filters)
+          setTimeout(() => {
+            filterSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }, 100)
+        }}
+      />
 
       <MortgageCalculator 
         isOpen={isMortgageCalculatorOpen} 
