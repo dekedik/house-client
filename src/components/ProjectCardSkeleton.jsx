@@ -12,7 +12,7 @@ const ProjectCardSkeleton = () => {
           </div>
           
           {/* Десктопная версия */}
-          <div className="hidden md:block relative rounded-lg overflow-hidden w-full h-full">
+          <div className="hidden md:block relative rounded-lg overflow-hidden w-full h-full min-h-[280px]">
             <div className="w-full h-full bg-gray-200"></div>
           </div>
         </div>
