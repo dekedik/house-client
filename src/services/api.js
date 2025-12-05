@@ -3,6 +3,36 @@ import { config } from '../config'
 // Базовый URL API
 const API_URL = config.apiUrl
 
+// Таймаут для запросов (30 секунд)
+const REQUEST_TIMEOUT = 30000
+
+// Функция для создания fetch с таймаутом
+const fetchWithTimeout = (url, options = {}, timeout = REQUEST_TIMEOUT) => {
+  return new Promise((resolve, reject) => {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, timeout)
+
+    fetch(url, {
+      ...options,
+      signal: controller.signal,
+    })
+      .then((response) => {
+        clearTimeout(timeoutId)
+        resolve(response)
+      })
+      .catch((error) => {
+        clearTimeout(timeoutId)
+        if (error.name === 'AbortError') {
+          reject(new Error('Превышено время ожидания ответа от сервера'))
+        } else {
+          reject(error)
+        }
+      })
+  })
+}
+
 // Функция для парсинга JSON полей (images, features)
 const parseJsonField = (field) => {
   if (!field) return null
@@ -72,7 +102,7 @@ export const api = {
     const url = `${API_URL}/v1/projects${queryString ? `?${queryString}` : ''}`
 
     try {
-      const response = await fetch(url, {
+      const response = await fetchWithTimeout(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -94,12 +124,14 @@ export const api = {
       // Парсим JSON поля для каждого проекта
       return projects.map(project => processProject(project))
     } catch (error) {
-      // Обработка сетевых ошибок
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        console.error('Ошибка сети при загрузке проектов:', error)
+      // Обработка сетевых ошибок и таймаутов
+      if (error.message && error.message.includes('Превышено время ожидания')) {
+        throw new Error('Превышено время ожидания ответа от сервера. Попробуйте позже.')
+      }
+      if (error.name === 'AbortError' || (error instanceof TypeError && (error.message.includes('fetch') || error.message.includes('Failed to fetch')))) {
         throw new Error('Ошибка подключения к серверу. Проверьте подключение к интернету.')
       }
-      console.error('Ошибка при загрузке проектов:', error)
+      // Перебрасываем остальные ошибки как есть
       throw error
     }
   },
@@ -113,7 +145,7 @@ export const api = {
     const url = `${API_URL}/v1/projects/${id}`
 
     try {
-      const response = await fetch(url, {
+      const response = await fetchWithTimeout(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -135,12 +167,14 @@ export const api = {
       // Парсим JSON поля
       return processProject(project)
     } catch (error) {
-      // Обработка сетевых ошибок
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        console.error('Ошибка сети при загрузке проекта:', error)
+      // Обработка сетевых ошибок и таймаутов
+      if (error.message && error.message.includes('Превышено время ожидания')) {
+        throw new Error('Превышено время ожидания ответа от сервера. Попробуйте позже.')
+      }
+      if (error.name === 'AbortError' || (error instanceof TypeError && (error.message.includes('fetch') || error.message.includes('Failed to fetch')))) {
         throw new Error('Ошибка подключения к серверу. Проверьте подключение к интернету.')
       }
-      console.error('Ошибка при загрузке проекта:', error)
+      // Перебрасываем остальные ошибки как есть
       throw error
     }
   },
@@ -181,7 +215,7 @@ export const api = {
         requestBody.notes = data.notes
       }
 
-      const response = await fetch(url, {
+      const response = await fetchWithTimeout(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -203,12 +237,14 @@ export const api = {
       const result = await response.json()
       return result
     } catch (error) {
-      // Обработка сетевых ошибок
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        console.error('Ошибка сети при отправке формы:', error)
+      // Обработка сетевых ошибок и таймаутов
+      if (error.message && error.message.includes('Превышено время ожидания')) {
+        throw new Error('Превышено время ожидания ответа от сервера. Попробуйте позже.')
+      }
+      if (error.name === 'AbortError' || (error instanceof TypeError && (error.message.includes('fetch') || error.message.includes('Failed to fetch')))) {
         throw new Error('Ошибка подключения к серверу. Проверьте подключение к интернету.')
       }
-      console.error('Ошибка при отправке формы:', error)
+      // Перебрасываем остальные ошибки как есть
       throw error
     }
   },

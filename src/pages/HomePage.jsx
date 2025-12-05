@@ -45,7 +45,7 @@ const HomePage = () => {
       setError(null)
     } catch (err) {
       console.error('Ошибка при загрузке проектов:', err)
-      setError('Не удалось загрузить проекты')
+      setError(err.message || 'Не удалось загрузить проекты')
       setProjects([])
     } finally {
       setLoading(false)
@@ -197,7 +197,15 @@ const HomePage = () => {
           </div>
         ) : error ? (
           <div className="text-center py-12">
-            <p className="text-red-600 text-lg">{error}</p>
+            <p className="text-red-600 text-lg mb-4">{error}</p>
+            {error.includes('время ожидания') || error.includes('подключения') ? (
+              <button
+                onClick={() => loadProjects()}
+                className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition"
+              >
+                Попробовать снова
+              </button>
+            ) : null}
           </div>
         ) : filteredProjects.length > 0 ? (
           <div className="space-y-4">

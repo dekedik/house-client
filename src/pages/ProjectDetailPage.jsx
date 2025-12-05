@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { api } from '../services/api'
 import CallbackModal from '../components/CallbackModal'
 import MortgageCalculator from '../components/MortgageCalculator'
+import ProjectDetailSkeleton from '../components/ProjectDetailSkeleton'
 
 const ProjectDetailPage = () => {
   const { id } = useParams()
@@ -95,7 +96,7 @@ const ProjectDetailPage = () => {
       }, 0)
     } catch (err) {
       console.error('Ошибка при загрузке проекта:', err)
-      setError('Проект не найден')
+      setError(err.message || 'Проект не найден')
     } finally {
       setLoading(false)
       
@@ -144,18 +145,26 @@ const ProjectDetailPage = () => {
   }
 
   if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-12 text-center">
-        <p className="text-gray-600 text-lg">Загрузка проекта...</p>
-      </div>
-    )
+    return <ProjectDetailSkeleton />
   }
 
   if (error || !project) {
     return (
       <div className="container mx-auto px-4 py-12 text-center">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">Проект не найден</h1>
-        <Link to="/" className="text-primary-600 hover:text-primary-700">
+        <h1 className="text-3xl font-bold text-gray-800 mb-4">
+          {error || 'Проект не найден'}
+        </h1>
+        <p className="text-gray-600 mb-6">
+          {error?.includes('время ожидания') 
+            ? 'Сервер не отвечает. Пожалуйста, попробуйте позже.'
+            : error?.includes('подключения')
+            ? 'Проверьте подключение к интернету и попробуйте снова.'
+            : 'Возможно, проект был удален или не существует.'}
+        </p>
+        <Link 
+          to="/" 
+          className="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition"
+        >
           Вернуться к каталогу
         </Link>
       </div>
