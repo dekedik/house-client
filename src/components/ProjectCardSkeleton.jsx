@@ -3,7 +3,7 @@ import React from 'react'
 const ProjectCardSkeleton = () => {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 animate-pulse">
-      <div className="flex flex-col md:flex-row md:items-stretch">
+      <div className="flex flex-col md:flex-row md:items-stretch md:h-[320px]">
         {/* Блок с изображением - первым в мобильной версии */}
         <div className="md:w-2/5 flex-shrink-0 p-2 md:p-4 flex items-stretch order-1 md:order-2">
           {/* Мобильная версия */}
@@ -12,13 +12,13 @@ const ProjectCardSkeleton = () => {
           </div>
           
           {/* Десктопная версия */}
-          <div className="hidden md:block relative rounded-lg overflow-hidden w-full h-full min-h-[280px]">
+          <div className="hidden md:block relative rounded-lg overflow-hidden w-full h-full">
             <div className="w-full h-full bg-gray-200"></div>
           </div>
         </div>
         
         {/* Блок с информацией - вторым в мобильной версии */}
-        <div className="flex-1 p-4 md:p-6 flex flex-col order-2 md:order-1 min-h-[280px]">
+        <div className="flex-1 p-4 md:p-6 flex flex-col order-2 md:order-1">
           <div className="flex items-start justify-between mb-2">
             <div className="flex-1">
               {/* Заголовок - text-xl md:text-2xl */}

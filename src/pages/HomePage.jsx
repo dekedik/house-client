@@ -57,40 +57,12 @@ const HomePage = () => {
     loadProjects()
   }, [loadProjects])
 
-  // Функция для определения класса жилья по цене
-  const getHousingClass = (price) => {
-    const priceNum = parseInt(price.replace(/\s/g, '').replace('₽', ''))
-    if (priceNum >= 400000) return 'Премиум'
-    if (priceNum >= 320000) return 'Комфорт +'
-    if (priceNum >= 250000) return 'Комфорт'
-    return 'Эконом'
-  }
-
-  // Функция для извлечения минимальной площади из строки "от 35 до 120 м²"
-  const getMinArea = (areaStr) => {
-    const match = areaStr.match(/от\s+(\d+)/)
-    return match ? parseInt(match[1]) : 0
-  }
-
-  // Функция для извлечения максимальной площади из строки "от 35 до 120 м²"
-  const getMaxArea = (areaStr) => {
-    const match = areaStr.match(/до\s+(\d+)/)
-    return match ? parseInt(match[1]) : Infinity
-  }
-
-  // Фильтрация на клиенте для сложных фильтров (класс жилья, тип жилья)
+  // Фильтрация на клиенте только для тех фильтров, которые не обрабатываются на сервере
+  // Серверные фильтры: district, status, housingClass, areaMin, areaMax, priceMin, priceMax
+  // Клиентские фильтры: housingType (тип жилья)
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
-      // Фильтр по району
-      if (filters.district && project.district !== filters.district) return false
-
-      // Фильтр по классу жилья
-      if (filters.housingClass) {
-        const projectClass = getHousingClass(project.price)
-        if (projectClass !== filters.housingClass) return false
-      }
-
-      // Фильтр по типу жилья
+      // Фильтр по типу жилья (только на клиенте)
       if (filters.housingType) {
         const projectRooms = project.rooms
         // Проверяем соответствие типа жилья
@@ -99,38 +71,6 @@ const HomePage = () => {
         if (filters.housingType === '2 спальни' && !projectRooms.includes('2')) return false
         if (filters.housingType === '3 спальни' && !projectRooms.includes('3')) return false
         if (filters.housingType === 'Более 4 спален' && !projectRooms.includes('4') && !projectRooms.includes('5')) return false
-      }
-
-      // Фильтр по статусу
-      if (filters.status && project.status !== filters.status) return false
-
-      // Фильтр по площади
-      if (filters.areaMin || filters.areaMax) {
-        const minArea = getMinArea(project.area)
-        const maxArea = getMaxArea(project.area)
-        
-        if (filters.areaMin) {
-          const filterMinArea = parseInt(filters.areaMin)
-          if (maxArea < filterMinArea) return false
-        }
-        if (filters.areaMax) {
-          const filterMaxArea = parseInt(filters.areaMax)
-          if (minArea > filterMaxArea) return false
-        }
-      }
-
-      // Фильтр по цене от
-      if (filters.priceFromMin || filters.priceFromMax) {
-        const priceFrom = parseInt(project.priceFrom.replace(/\s/g, '').replace('₽', ''))
-        
-        if (filters.priceFromMin) {
-          const filterMinPrice = parseInt(filters.priceFromMin)
-          if (priceFrom < filterMinPrice) return false
-        }
-        if (filters.priceFromMax) {
-          const filterMaxPrice = parseInt(filters.priceFromMax)
-          if (priceFrom > filterMaxPrice) return false
-        }
       }
 
       return true

@@ -57,7 +57,7 @@ const FilterPanel = ({ onFilterChange, initialFilters = null }) => {
     { value: '', label: 'Любой класс' },
     { value: 'Эконом', label: 'Эконом' },
     { value: 'Комфорт', label: 'Комфорт' },
-    { value: 'Комфорт +', label: 'Комфорт +' },
+    { value: 'Комфорт+', label: 'Комфорт+' },
     { value: 'Премиум', label: 'Премиум' },
   ]
   const housingTypes = [

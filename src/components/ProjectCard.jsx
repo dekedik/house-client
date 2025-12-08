@@ -117,7 +117,7 @@ const ProjectCard = ({ project }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200">
-      <div className="flex flex-col md:flex-row md:items-stretch">
+      <div className="flex flex-col md:flex-row md:items-stretch md:h-[320px]">
         {/* Блок с изображениями - первым в мобильной версии */}
         {mainImage && (
           <div className="md:w-2/5 flex-shrink-0 p-2 md:p-4 flex items-stretch order-1 md:order-2">
@@ -305,7 +305,17 @@ const ProjectCard = ({ project }) => {
           <div className="flex items-start justify-between mb-2">
             <div className="flex-1">
               <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-1">{project.name}</h3>
-              <span className="text-base text-gray-500">{project.district}</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-base text-gray-500">{project.district}</span>
+                {(project.housingClass || project.housing_class) && (
+                  <>
+                    <span className="text-gray-400">•</span>
+                    <span className="text-base text-primary-600 font-medium">
+                      {project.housingClass || project.housing_class}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
           

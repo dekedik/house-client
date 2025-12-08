@@ -59,6 +59,9 @@ const processProject = (project) => {
   if (project.full_description && !project.fullDescription) {
     project.fullDescription = project.full_description
   }
+  if (project.housing_class && !project.housingClass) {
+    project.housingClass = project.housing_class
+  }
   
   // Парсим images
   if (project.images) {
@@ -80,6 +83,7 @@ export const api = {
    * @param {string} filters.district - Район
    * @param {string} filters.status - Статус проекта
    * @param {string} filters.type - Тип проекта
+   * @param {string} filters.housingClass - Класс жилья
    * @param {number} filters.areaMin - Минимальная площадь
    * @param {number} filters.areaMax - Максимальная площадь
    * @param {number} filters.priceMin - Минимальная цена
@@ -93,6 +97,7 @@ export const api = {
     if (filters.district) params.append('district', filters.district)
     if (filters.status) params.append('status', filters.status)
     if (filters.type) params.append('type', filters.type)
+    if (filters.housingClass) params.append('housing_class', filters.housingClass)
     if (filters.areaMin) params.append('areaMin', filters.areaMin)
     if (filters.areaMax) params.append('areaMax', filters.areaMax)
     if (filters.priceMin) params.append('priceMin', filters.priceMin)

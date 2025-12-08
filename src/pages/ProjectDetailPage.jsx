@@ -319,7 +319,17 @@ const ProjectDetailPage = () => {
                 <span>Назад</span>
               </button>
                 <h1 className="text-3xl font-bold text-gray-800 mb-2">{project.name}</h1>
-                <p className="text-gray-600 mb-6">{project.district}</p>
+                <div className="flex flex-wrap items-center gap-2 mb-6">
+                  <p className="text-gray-600">{project.district}</p>
+                  {(project.housingClass || project.housing_class) && (
+                    <>
+                      <span className="text-gray-400">•</span>
+                      <span className="text-primary-600 font-medium">
+                        {project.housingClass || project.housing_class}
+                      </span>
+                    </>
+                  )}
+                </div>
 
                 <div className="space-y-4 mb-6">
                   <div>
@@ -391,6 +401,12 @@ const ProjectDetailPage = () => {
                     <span className="text-gray-600">Район</span>
                     <span className="font-semibold text-gray-800">{project.district}</span>
                   </div>
+                  {(project.housingClass || project.housing_class) && (
+                    <div className="flex justify-between py-2 border-b">
+                      <span className="text-gray-600">Класс ЖК</span>
+                      <span className="font-semibold text-gray-800">{project.housingClass || project.housing_class}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between py-2 border-b">
                     <span className="text-gray-600">Этажность</span>
                     <span className="font-semibold text-gray-800">{project.floors}</span>
