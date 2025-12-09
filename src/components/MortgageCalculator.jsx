@@ -280,10 +280,10 @@ const MortgageCalculator = ({ isOpen, onClose, initialPrice = '', projectId = nu
                   step="0.1"
                   value={formData.interestRate}
                   onChange={(e) => setFormData(prev => ({ ...prev, interestRate: e.target.value }))}
-                  placeholder="8.5"
+                  placeholder="3.5"
                 />
                 <div className="flex gap-1.5 sm:gap-2 mt-2 flex-wrap">
-                  {[7.5, 8.0, 8.5, 9.0, 9.5].map((rate) => (
+                  {[3.5, 6.0, 7.0, 8.5, 9.0].map((rate) => (
                     <button
                       key={rate}
                       type="button"
