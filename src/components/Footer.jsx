@@ -62,19 +62,19 @@ const Footer = () => {
               <li>
                 <Link 
                   to="/" 
-                  state={{ filters: { district: '', housingClass: 'Батайск', housingType: '', status: '', areaMin: '', areaMax: '', priceFromMin: '', priceFromMax: '' } }}
+                  state={{ filters: { district: '', housingClass: 'Премиум', housingType: '', status: '', areaMin: '', areaMax: '', priceFromMin: '', priceFromMax: '' } }}
                   className="hover:text-white transition"
                 >
-                  Батайск
+                  Премиум
                 </Link>
               </li>
               <li>
                 <Link 
                   to="/" 
-                  state={{ filters: { district: '', housingClass: 'Аксай', housingType: '', status: '', areaMin: '', areaMax: '', priceFromMin: '', priceFromMax: '' } }}
+                  state={{ filters: { district: '', housingClass: 'Элитный', housingType: '', status: '', areaMin: '', areaMax: '', priceFromMin: '', priceFromMax: '' } }}
                   className="hover:text-white transition"
                 >
-                  Аксай
+                  Элитный
                 </Link>
               </li>
             </ul>
