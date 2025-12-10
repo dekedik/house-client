@@ -50,8 +50,8 @@ const FilterPanel = ({ onFilterChange, initialFilters = null }) => {
     { value: 'Октябрьский район', label: 'Октябрьский район' },
     { value: 'Ворошиловский район', label: 'Ворошиловский район' },
     { value: 'Пролетарский район', label: 'Пролетарский район' },
-    { value: 'Область и другие регионы', label: 'Область и другие регионы' },
-    { value: 'Вторичный рынок', label: 'Вторичный рынок' },
+    { value: 'Батайск', label: 'Батайск' },
+    { value: 'Аксай', label: 'Аксай' },
   ]
   const housingClasses = [
     { value: '', label: 'Любой класс' },
@@ -59,8 +59,6 @@ const FilterPanel = ({ onFilterChange, initialFilters = null }) => {
     { value: 'Комфорт', label: 'Комфорт' },
     { value: 'Комфорт+', label: 'Комфорт+' },
     { value: 'Бизнес', label: 'Бизнес' },
-    { value: 'Батайск', label: 'Батайск' },
-    { value: 'Аксай', label: 'Аксай' },
   ]
   const housingTypes = [
     { value: '', label: 'Любой тип' },
