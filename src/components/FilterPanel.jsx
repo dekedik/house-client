@@ -53,6 +53,7 @@ const FilterPanel = ({ onFilterChange, initialFilters = null }) => {
     {value: 'Верхнетемерницкий район', label: 'Верхнетемерницкий район'},
     { value: 'Батайск', label: 'Батайск' },
     { value: 'Аксай', label: 'Аксай' },
+    { value: 'Азов', label: 'Азов' },
     { value: 'Область и другие регионы', label: 'Область и другие регионы' },
   ]
   const housingClasses = [
