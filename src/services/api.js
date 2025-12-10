@@ -73,6 +73,21 @@ const processProject = (project) => {
     project.features = parseJsonField(project.features) || []
   }
   
+  // Парсим rooms_available
+  if (project.rooms_available) {
+    project.rooms_available = parseJsonField(project.rooms_available) || []
+  }
+  
+  // Парсим payment_types
+  if (project.payment_types) {
+    project.payment_types = parseJsonField(project.payment_types) || []
+  }
+  
+  // Парсим design_types
+  if (project.design_types) {
+    project.design_types = parseJsonField(project.design_types) || []
+  }
+  
   return project
 }
 

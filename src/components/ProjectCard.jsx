@@ -26,6 +26,58 @@ const ProjectCard = ({ project }) => {
     const hasCurrency = price.includes('₽') || price.includes('руб')
     return hasCurrency ? `${formatted} ₽` : formatted
   }
+
+  // Функция для форматирования комнат
+  const formatRooms = (rooms) => {
+    if (!rooms) return ''
+    
+    // Если это строка, возвращаем как есть
+    if (typeof rooms === 'string') return rooms
+    
+    // Если это массив
+    if (Array.isArray(rooms)) {
+      if (rooms.length === 0) return ''
+      if (rooms.length === 1) return rooms[0]
+      
+      // Разделяем на студии и квартиры с номерами
+      const studios = rooms.filter(r => r.toLowerCase().includes('студия'))
+      const numbered = rooms.filter(r => !r.toLowerCase().includes('студия'))
+      
+      const result = []
+      
+      // Добавляем студии
+      if (studios.length > 0) {
+        result.push(studios.join(', '))
+      }
+      
+      // Обрабатываем квартиры с номерами
+      if (numbered.length > 0) {
+        // Извлекаем числа из строк типа "1к", "2к" и т.д.
+        const numbers = numbered.map(r => {
+          const match = r.match(/(\d+)/)
+          return match ? parseInt(match[1]) : null
+        }).filter(n => n !== null).sort((a, b) => a - b)
+        
+        if (numbers.length > 0) {
+          // Проверяем, идут ли числа подряд
+          const isConsecutive = numbers.length > 1 && 
+            numbers.every((num, idx) => idx === 0 || num === numbers[idx - 1] + 1)
+          
+          if (isConsecutive && numbers.length > 2) {
+            // Если идут подряд и их больше 2, делаем диапазон
+            result.push(`${numbers[0]}к-${numbers[numbers.length - 1]}к`)
+          } else {
+            // Иначе через запятую
+            result.push(numbered.join(', '))
+          }
+        }
+      }
+      
+      return result.join(', ')
+    }
+    
+    return rooms
+  }
   
   // Обрабатываем images - может быть массивом, строкой JSON или отсутствовать
   let images = []
@@ -332,10 +384,12 @@ const ProjectCard = ({ project }) => {
               <p className="text-gray-500 text-base mb-1">Срок сдачи</p>
               <p className="text-base font-semibold text-gray-800">{project.completion}</p>
             </div>
-            {project.rooms && (
+            {(project.rooms_available) && (
               <div>
                 <p className="text-gray-500 text-base mb-1">Комнаты</p>
-                <p className="text-base font-semibold text-gray-800">{project.rooms}</p>
+                <p className="text-base font-semibold text-gray-800">
+                  {formatRooms(project.rooms_available)}
+                </p>
               </div>
             )}
             {project.area && (

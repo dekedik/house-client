@@ -21,6 +21,8 @@ const HomePage = () => {
     areaMax: '',
     priceFromMin: '',
     priceFromMax: '',
+    paymentType: '',
+    designType: '',
   })
   const [isMortgageCalculatorOpen, setIsMortgageCalculatorOpen] = useState(false)
   const [isApartmentFinderOpen, setIsApartmentFinderOpen] = useState(false)
@@ -59,18 +61,56 @@ const HomePage = () => {
 
   // Фильтрация на клиенте только для тех фильтров, которые не обрабатываются на сервере
   // Серверные фильтры: district, status, housingClass, areaMin, areaMax, priceMin, priceMax
-  // Клиентские фильтры: housingType (тип жилья)
+  // Клиентские фильтры: housingType (тип жилья), paymentType (вид оплаты), designType (вид отделки)
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
       // Фильтр по типу жилья (только на клиенте)
       if (filters.housingType) {
-        const projectRooms = project.rooms
+        // Используем rooms_available (массив) или rooms (строка) для обратной совместимости
+        let projectRooms = project.rooms_available || project.rooms
+        
+        // Если это строка, преобразуем в массив
+        if (typeof projectRooms === 'string') {
+          projectRooms = [projectRooms]
+        }
+        
+        // Если массив пустой или нет данных, пропускаем проект
+        if (!projectRooms || projectRooms.length === 0) return false
+        
         // Проверяем соответствие типа жилья
-        if (filters.housingType === 'Студия' && !projectRooms.includes('Студия')) return false
-        if (filters.housingType === '1 спальня' && !projectRooms.includes('1')) return false
-        if (filters.housingType === '2 спальни' && !projectRooms.includes('2')) return false
-        if (filters.housingType === '3 спальни' && !projectRooms.includes('3')) return false
-        if (filters.housingType === 'Более 4 спален' && !projectRooms.includes('4') && !projectRooms.includes('5')) return false
+        if (filters.housingType === 'Студия') {
+          return projectRooms.some(room => room.toLowerCase().includes('студия'))
+        }
+        if (filters.housingType === '1 спальня') {
+          return projectRooms.some(room => room.includes('1к') || room.includes('1 '))
+        }
+        if (filters.housingType === '2 спальни') {
+          return projectRooms.some(room => room.includes('2к') || room.includes('2 '))
+        }
+        if (filters.housingType === '3 спальни') {
+          return projectRooms.some(room => room.includes('3к') || room.includes('3 '))
+        }
+        if (filters.housingType === 'Более 4 спален') {
+          return projectRooms.some(room => 
+            room.includes('4к') || room.includes('4 ') || 
+            room.includes('5к') || room.includes('5 ') ||
+            room.includes('6к') || room.includes('6 ')
+          )
+        }
+      }
+
+      // Фильтр по виду оплаты
+      if (filters.paymentType) {
+        const projectPaymentTypes = project.payment_types
+        if (!projectPaymentTypes || projectPaymentTypes.length === 0) return false
+        if (!projectPaymentTypes.includes(filters.paymentType)) return false
+      }
+
+      // Фильтр по виду отделки
+      if (filters.designType) {
+        const projectDesignTypes = project.design_types
+        if (!projectDesignTypes || projectDesignTypes.length === 0) return false
+        if (!projectDesignTypes.includes(filters.designType)) return false
       }
 
       return true

@@ -12,6 +12,8 @@ const FilterPanel = ({ onFilterChange, initialFilters = null }) => {
     areaMax: '',
     priceFromMin: '',
     priceFromMax: '',
+    paymentType: '',
+    designType: '',
   })
   const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false)
   const isInitialMount = useRef(true)
@@ -65,7 +67,7 @@ const FilterPanel = ({ onFilterChange, initialFilters = null }) => {
     { value: 'Премиум', label: 'Премиум' }
   ]
   const housingTypes = [
-    { value: '', label: 'Любой тип' },
+    { value: '', label: 'Любое' },
     { value: 'Студия', label: 'Студия' },
     { value: '1 спальня', label: '1 спальня' },
     { value: '2 спальни', label: '2 спальни' },
@@ -102,6 +104,8 @@ const FilterPanel = ({ onFilterChange, initialFilters = null }) => {
       areaMax: '',
       priceFromMin: '',
       priceFromMax: '',
+      paymentType: '',
+      designType: '',
     }
     setFilters(emptyFilters)
     onFilterChange(emptyFilters)
@@ -150,13 +154,13 @@ const FilterPanel = ({ onFilterChange, initialFilters = null }) => {
             placeholder="Любой класс"
           />
 
-          {/* Тип жилья */}
+          {/* Количество комнат */}
           <CustomSelect
-            label="Тип жилья"
+            label="Количество комнат"
             value={filters.housingType}
             onChange={(e) => handleChange('housingType', e)}
             options={housingTypes}
-            placeholder="Любой тип"
+            placeholder="Любое"
           />
 
           {/* Статус */}

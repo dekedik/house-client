@@ -383,13 +383,85 @@ const ProjectDetailPage = () => {
       {/* Description Section */}
       <section className="bg-white py-12">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl">
+          <div className="max-w-full">
             <h2 className="text-3xl font-bold text-gray-800 mb-6">О проекте</h2>
             <p className="text-gray-700 text-lg leading-relaxed mb-8">
               {project.fullDescription}
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Карточки с основными категориями */}
+            <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+              {/* Виды оплаты */}
+              {project.payment_types && project.payment_types.length > 0 && (
+                <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl p-6 border border-primary-200">
+                  <div className="flex items-center mb-4">
+                    <div className="w-12 h-12 bg-primary-600 rounded-lg flex items-center justify-center mr-3">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-800">Виды оплаты</h3>
+                  </div>
+                  <ul className="space-y-2">
+                    {project.payment_types.map((type, index) => (
+                      <li key={index} className="flex items-start">
+                        <svg className="w-5 h-5 text-primary-600 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className="text-gray-700">{type}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Виды отделки */}
+              {project.design_types && project.design_types.length > 0 && (
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                  <div className="flex items-center mb-4">
+                    <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-800">Виды отделки</h3>
+                  </div>
+                  <ul className="space-y-2">
+                    {project.design_types.map((type, index) => (
+                      <li key={index} className="flex items-start">
+                        <svg className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className="text-gray-700">{type}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Количество комнат */}
+              {project.rooms_available && project.rooms_available.length > 0 && (
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
+                  <div className="flex items-center mb-4">
+                    <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mr-3">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-800">Количество комнат</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {project.rooms_available.map((room, index) => (
+                      <span key={index} className="px-3 py-1.5 bg-white text-green-700 font-semibold rounded-lg border border-green-300 text-sm">
+                        {room}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Характеристики</h3>
                 <div className="space-y-3">

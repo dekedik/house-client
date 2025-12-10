@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import CustomInput from './CustomInput'
+import CustomSelect from './CustomSelect'
 
 const MoreFiltersModal = ({ isOpen, onClose, filters, onApply }) => {
   const [localFilters, setLocalFilters] = useState({
@@ -7,6 +8,8 @@ const MoreFiltersModal = ({ isOpen, onClose, filters, onApply }) => {
     areaMax: '',
     priceFromMin: '',
     priceFromMax: '',
+    paymentType: '',
+    designType: '',
   })
 
   useEffect(() => {
@@ -16,6 +19,8 @@ const MoreFiltersModal = ({ isOpen, onClose, filters, onApply }) => {
         areaMax: filters.areaMax || '',
         priceFromMin: filters.priceFromMin || '',
         priceFromMax: filters.priceFromMax || '',
+        paymentType: filters.paymentType || '',
+        designType: filters.designType || '',
       })
     }
   }, [isOpen, filters])
@@ -35,10 +40,29 @@ const MoreFiltersModal = ({ isOpen, onClose, filters, onApply }) => {
       areaMax: '',
       priceFromMin: '',
       priceFromMax: '',
+      paymentType: '',
+      designType: '',
     }
     setLocalFilters(emptyFilters)
     onApply(emptyFilters)
   }
+
+  const paymentTypes = [
+    { value: '', label: 'Любой' },
+    { value: '100% оплата', label: '100% оплата' },
+    { value: 'Рассрочка', label: 'Рассрочка' },
+    { value: 'Ипотека', label: 'Ипотека' },
+    { value: 'Военная ипотека', label: 'Военная ипотека' },
+    { value: 'Субсидированная ипотека', label: 'Субсидированная ипотека' },
+    { value: 'Траншевая ипотека', label: 'Траншевая ипотека' },
+  ]
+
+  const designTypes = [
+    { value: '', label: 'Любой' },
+    { value: 'Без отделки', label: 'Без отделки' },
+    { value: 'Предчистовая', label: 'Предчистовая' },
+    { value: 'С ремонтом', label: 'С ремонтом' },
+  ]
 
   if (!isOpen) return null
 
@@ -97,6 +121,28 @@ const MoreFiltersModal = ({ isOpen, onClose, filters, onApply }) => {
                   placeholder="До"
                 />
               </div>
+            </div>
+
+            {/* Вид оплаты */}
+            <div>
+              <CustomSelect
+                label="Вид оплаты"
+                value={localFilters.paymentType}
+                onChange={(e) => handleChange('paymentType', e.target.value)}
+                options={paymentTypes}
+                placeholder="Любой"
+              />
+            </div>
+
+            {/* Вид отделки */}
+            <div>
+              <CustomSelect
+                label="Вид отделки"
+                value={localFilters.designType}
+                onChange={(e) => handleChange('designType', e.target.value)}
+                options={designTypes}
+                placeholder="Любой"
+              />
             </div>
           </div>
 
