@@ -59,6 +59,24 @@ const Footer = () => {
                   Комфорт
                 </Link>
               </li>
+              <li>
+                <Link 
+                  to="/" 
+                  state={{ filters: { district: '', housingClass: 'Батайск', housingType: '', status: '', areaMin: '', areaMax: '', priceFromMin: '', priceFromMax: '' } }}
+                  className="hover:text-white transition"
+                >
+                  Батайск
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/" 
+                  state={{ filters: { district: '', housingClass: 'Аксай', housingType: '', status: '', areaMin: '', areaMax: '', priceFromMin: '', priceFromMax: '' } }}
+                  className="hover:text-white transition"
+                >
+                  Аксай
+                </Link>
+              </li>
             </ul>
           </div>
 
