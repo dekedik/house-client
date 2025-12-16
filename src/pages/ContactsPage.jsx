@@ -1,7 +1,66 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 
 const ContactsPage = () => {
+  const mapRef = useRef(null)
+  const mapInstanceRef = useRef(null)
+
+  useEffect(() => {
+    // Загружаем скрипт Яндекс карт
+    if (!window.ymaps) {
+      const script = document.createElement('script')
+      script.src = 'https://api-maps.yandex.ru/2.1/?apikey=&lang=ru_RU'
+      script.async = true
+      document.head.appendChild(script)
+      
+      script.onload = () => {
+        window.ymaps.ready(() => {
+          initMap()
+        })
+      }
+    } else {
+      window.ymaps.ready(() => {
+        initMap()
+      })
+    }
+
+    function initMap() {
+      if (!mapRef.current || mapInstanceRef.current) return
+
+      // Координаты: проспект Михаила Нагибина, 38
+      const coordinates = [47.264380, 39.721714]
+
+      // Создаем карту
+      mapInstanceRef.current = new window.ymaps.Map(mapRef.current, {
+        center: coordinates,
+        zoom: 16,
+        controls: ['zoomControl', 'fullscreenControl']
+      })
+
+      // Добавляем метку
+      const placemark = new window.ymaps.Placemark(
+        coordinates,
+        {
+          balloonContent: 'проспект Михаила Нагибина, 38, Ростов-на-Дону, 344068',
+          hintContent: 'Наш офис'
+        },
+        {
+          preset: 'islands#blueDotIcon'
+        }
+      )
+
+      mapInstanceRef.current.geoObjects.add(placemark)
+    }
+
+    // Очистка при размонтировании
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.destroy()
+        mapInstanceRef.current = null
+      }
+    }
+  }, [])
+
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Breadcrumbs */}
@@ -48,19 +107,29 @@ const ContactsPage = () => {
                 <h3 className="text-lg font-semibold text-gray-700 mb-4">Адрес</h3>
                 <p className="text-gray-600 text-lg">
                   г. Ростов-на-Дону<br />
-                  ул. Михаила Нагибина, д.38
+                  проспект Михаила Нагибина, д.38
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+          <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mb-8">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">Режим работы</h2>
             <div className="space-y-2 text-gray-600">
               <p className="text-lg"><span className="font-semibold">Понедельник - Пятница:</span> 9:00 - 19:00</p>
               <p className="text-lg"><span className="font-semibold">Суббота:</span> 10:00 - 17:00</p>
               <p className="text-lg"><span className="font-semibold">Воскресенье:</span> Выходной</p>
             </div>
+          </div>
+
+          {/* Яндекс карта */}
+          <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Как нас найти</h2>
+            <div 
+              ref={mapRef}
+              className="w-full h-96 rounded-lg overflow-hidden"
+              style={{ minHeight: '400px' }}
+            />
           </div>
         </div>
       </section>

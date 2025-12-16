@@ -144,3 +144,11 @@ const ProjectDetailSkeleton = () => {
 
 export default ProjectDetailSkeleton
 
+
+
+
+
+
+
+
+
