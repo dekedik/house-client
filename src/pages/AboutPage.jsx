@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-const AboutPage = () => {
+const AboutPage = React.memo(() => {
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Breadcrumbs */}
@@ -93,7 +93,9 @@ const AboutPage = () => {
       </section>
     </div>
   )
-}
+})
+
+AboutPage.displayName = 'AboutPage'
 
 export default AboutPage
 

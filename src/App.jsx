@@ -4,11 +4,13 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
 
-// Lazy loading для страниц
+// Lazy loading только для тяжелых страниц
 const HomePage = lazy(() => import('./pages/HomePage'))
 const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'))
-const ContactsPage = lazy(() => import('./pages/ContactsPage'))
-const AboutPage = lazy(() => import('./pages/AboutPage'))
+
+// Легкие страницы загружаем сразу для быстрого рендера
+import ContactsPage from './pages/ContactsPage'
+import AboutPage from './pages/AboutPage'
 
 function App() {
   return (
