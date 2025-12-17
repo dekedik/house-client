@@ -17,6 +17,34 @@ const ProjectDetailPage = () => {
   const touchStartX = useRef(0)
   const touchEndX = useRef(0)
 
+  // Получаем images и features (уже распарсены в API, но проверяем для обратной совместимости)
+  // Должно быть объявлено до использования в useEffect
+  const projectImages = useMemo(() => {
+    if (!project) return []
+    if (Array.isArray(project.images)) return project.images
+    if (typeof project.images === 'string') {
+      try {
+        return JSON.parse(project.images)
+      } catch {
+        return []
+      }
+    }
+    return []
+  }, [project?.images])
+
+  const projectFeatures = useMemo(() => {
+    if (!project) return []
+    if (Array.isArray(project.features)) return project.features
+    if (typeof project.features === 'string') {
+      try {
+        return JSON.parse(project.features)
+      } catch {
+        return []
+      }
+    }
+    return []
+  }, [project?.features])
+
   // Прокручиваем страницу вверх ДО рендеринга (useLayoutEffect выполняется синхронно)
   useLayoutEffect(() => {
     // Немедленная прокрутка вверх
@@ -94,13 +122,7 @@ const ProjectDetailPage = () => {
 
   // Поддержка клавиатурной навигации для слайдера
   useEffect(() => {
-    if (!project?.images) return
-    
-    const projectImages = Array.isArray(project.images) 
-      ? project.images 
-      : (project.images ? (typeof project.images === 'string' ? JSON.parse(project.images) : []) : [])
-    
-    if (projectImages.length <= 1) return
+    if (!projectImages || projectImages.length <= 1) return
     
     const handleKeyPress = (e) => {
       if (e.key === 'ArrowLeft') {
@@ -112,7 +134,7 @@ const ProjectDetailPage = () => {
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [project?.images])
+  }, [projectImages])
 
   const loadProject = async () => {
     try {
@@ -141,33 +163,6 @@ const ProjectDetailPage = () => {
       }, 0)
     }
   }
-
-  // Получаем images и features (уже распарсены в API, но проверяем для обратной совместимости)
-  const projectImages = useMemo(() => {
-    if (!project) return []
-    if (Array.isArray(project.images)) return project.images
-    if (typeof project.images === 'string') {
-      try {
-        return JSON.parse(project.images)
-      } catch {
-        return []
-      }
-    }
-    return []
-  }, [project?.images])
-
-  const projectFeatures = useMemo(() => {
-    if (!project) return []
-    if (Array.isArray(project.features)) return project.features
-    if (typeof project.features === 'string') {
-      try {
-        return JSON.parse(project.features)
-      } catch {
-        return []
-      }
-    }
-    return []
-  }, [project?.features])
 
   // Обработка свайпа для слайдера изображений
   const handleTouchStart = (e) => {
