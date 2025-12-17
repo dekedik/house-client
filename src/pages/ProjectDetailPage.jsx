@@ -61,11 +61,40 @@ const ProjectDetailPage = () => {
 
   // Предзагрузка всех изображений для плавного переключения
   useEffect(() => {
-    if (projectImages && projectImages.length > 0) {
-      projectImages.forEach((imageUrl) => {
-        if (imageUrl) {
-          const img = new Image()
-          img.src = imageUrl
+    if (!projectImages || projectImages.length <= 1) return
+    
+    // Предзагружаем все изображения через создание Image объектов
+    projectImages.forEach((imageUrl) => {
+      if (imageUrl) {
+        const img = new Image()
+        // Устанавливаем обработчики для отслеживания загрузки
+        img.onload = () => {
+          // Изображение успешно загружено и готово к использованию
+        }
+        img.onerror = () => {
+          // Ошибка загрузки - игнорируем
+        }
+        // Начинаем загрузку - устанавливаем src в конце, чтобы обработчики успели установиться
+        img.src = imageUrl
+      }
+    })
+    
+    // Также добавляем preload ссылки в head для более надежной предзагрузки
+    const links = projectImages.map((imageUrl) => {
+      if (!imageUrl) return null
+      const link = document.createElement('link')
+      link.rel = 'preload'
+      link.as = 'image'
+      link.href = imageUrl
+      document.head.appendChild(link)
+      return link
+    }).filter(Boolean)
+    
+    // Очистка при размонтировании
+    return () => {
+      links.forEach(link => {
+        if (link && link.parentNode) {
+          link.parentNode.removeChild(link)
         }
       })
     }
@@ -201,21 +230,6 @@ const ProjectDetailPage = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* Скрытые изображения для предзагрузки */}
-      {projectImages && projectImages.length > 0 && (
-        <div className="hidden">
-          {projectImages.map((imageUrl, index) => (
-            <img
-              key={index}
-              src={imageUrl}
-              alt=""
-              loading="eager"
-              fetchPriority="high"
-            />
-          ))}
-        </div>
-      )}
-      
       {/* Breadcrumbs */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -243,12 +257,12 @@ const ProjectDetailPage = () => {
                 {projectImages.length > 0 ? (
                   <>
                     <img
+                      key={`main-${selectedImage}-${projectImages[selectedImage]}`}
                       src={projectImages[selectedImage] || project.image}
                       alt={project.name}
                       className="w-full h-full object-cover select-none"
                       draggable={false}
                       loading="eager"
-                      fetchPriority="high"
                     />
                     
                     {/* Кнопки навигации слайдера */}
@@ -303,7 +317,6 @@ const ProjectDetailPage = () => {
                     alt={project.name}
                     className="w-full h-full object-cover"
                     loading="eager"
-                    fetchPriority="high"
                   />
                 )}
                 
@@ -331,8 +344,7 @@ const ProjectDetailPage = () => {
                       src={image}
                       alt={`${project.name} ${index + 1}`}
                       className="w-full h-full object-cover"
-                      loading="eager"
-                      fetchPriority={index < 3 ? "high" : "low"}
+                      loading="lazy"
                     />
                   </button>
                 ))}

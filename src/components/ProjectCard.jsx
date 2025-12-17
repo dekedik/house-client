@@ -169,29 +169,47 @@ const ProjectCard = ({ project }) => {
 
   // Предзагрузка всех изображений для плавного переключения
   useEffect(() => {
-    images.forEach((imageUrl) => {
+    if (images.length <= 1) return
+    
+    // Предзагружаем все изображения через создание Image объектов
+    images.forEach((imageUrl, index) => {
       if (imageUrl) {
         const img = new Image()
+        // Устанавливаем обработчики для отслеживания загрузки
+        img.onload = () => {
+          // Изображение успешно загружено и готово к использованию
+        }
+        img.onerror = () => {
+          // Ошибка загрузки - игнорируем
+        }
+        // Начинаем загрузку - устанавливаем src в конце, чтобы обработчики успели установиться
         img.src = imageUrl
       }
     })
+    
+    // Также добавляем preload ссылки в head для более надежной предзагрузки
+    const links = images.map((imageUrl, index) => {
+      if (!imageUrl) return null
+      const link = document.createElement('link')
+      link.rel = 'preload'
+      link.as = 'image'
+      link.href = imageUrl
+      document.head.appendChild(link)
+      return link
+    }).filter(Boolean)
+    
+    // Очистка при размонтировании
+    return () => {
+      links.forEach(link => {
+        if (link && link.parentNode) {
+          link.parentNode.removeChild(link)
+        }
+      })
+    }
   }, [images])
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200">
-      {/* Скрытые изображения для предзагрузки */}
-      <div className="hidden">
-        {images.map((imageUrl, index) => (
-          <img
-            key={index}
-            src={imageUrl}
-            alt=""
-            loading="eager"
-            fetchPriority="high"
-          />
-        ))}
-      </div>
-      
       <div className="flex flex-col md:flex-row md:items-stretch md:h-[320px]">
         {/* Блок с изображениями - первым в мобильной версии */}
         {mainImage && (
@@ -207,13 +225,13 @@ const ProjectCard = ({ project }) => {
                   style={{ height: '192px', width: '100%' }}
                 >
                   <img
+                    key={`mobile-${currentImageIndex}-${currentImage}`}
                     src={currentImage}
                     alt={`${project.name} ${currentImageIndex + 1}`}
                     className="select-none"
                     style={{ width: '100%', height: '192px', objectFit: 'cover', display: 'block' }}
                     draggable={false}
                     loading="eager"
-                    fetchPriority="high"
                   />
                   {project.status && (
                     <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium z-10">
@@ -276,7 +294,6 @@ const ProjectCard = ({ project }) => {
                   alt={project.name}
                   style={{ width: '100%', height: '192px', objectFit: 'cover', display: 'block' }}
                   loading="eager"
-                  fetchPriority="high"
                 />
                 {project.status && (
                   <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium">
@@ -296,13 +313,13 @@ const ProjectCard = ({ project }) => {
               <div className="hidden md:block relative rounded-lg overflow-hidden w-full h-full">
                 <div className="relative w-full h-full">
                   <img
+                    key={`desktop-${currentImageIndex}-${currentImage}`}
                     src={currentImage}
                     alt={`${project.name} ${currentImageIndex + 1}`}
                     className="select-none w-full h-full"
                     style={{ objectFit: 'cover', display: 'block' }}
                     draggable={false}
                     loading="eager"
-                    fetchPriority="high"
                   />
                   {project.status && (
                     <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium z-10">
@@ -366,7 +383,6 @@ const ProjectCard = ({ project }) => {
                   className="w-full h-full"
                   style={{ objectFit: 'cover', display: 'block' }}
                   loading="eager"
-                  fetchPriority="high"
                 />
                 {project.status && (
                   <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium">
