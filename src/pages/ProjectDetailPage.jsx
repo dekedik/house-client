@@ -360,15 +360,6 @@ const ProjectDetailPage = () => {
             {/* Sidebar Info */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-xl shadow-lg p-6 sticky top-4">
-              <button
-                onClick={() => navigate(-1)}
-                className="mb-4 text-gray-600 hover:text-primary-600 flex items-center space-x-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                <span>Назад</span>
-              </button>
                 <h1 className="text-3xl font-bold text-gray-800 mb-2">{project.name}</h1>
                 <div className="flex flex-wrap items-center gap-2 mb-6">
                   <p className="text-gray-600">{project.district}</p>
