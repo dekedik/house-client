@@ -126,13 +126,22 @@ export const api = {
     const url = `${API_URL}/v1/projects${queryString ? `?${queryString}` : ''}`
 
     try {
-      // Используем кеш браузера если запрос был предзагружен
+      // Определяем, является ли это начальной загрузкой (без фильтров)
+      const isInitialLoad = !filters.district && !filters.status && !filters.housingClass && 
+                            !filters.areaMin && !filters.areaMax && !filters.priceMin && 
+                            !filters.priceMax && filters.limit === 5 && (filters.offset === 0 || filters.offset === undefined)
+      
+      // Используем кеш браузера для предзагруженных запросов (prefetch из HTML)
+      // Для начальной загрузки используем 'force-cache' чтобы гарантированно использовать prefetch
+      const cacheMode = isInitialLoad ? 'force-cache' : 'default'
+      
       const response = await fetchWithTimeout(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        cache: 'default', // Используем кеш браузера для предзагруженных запросов
+        cache: cacheMode, // Используем force-cache для начальной загрузки чтобы использовать prefetch
+        priority: isInitialLoad ? 'high' : 'auto', // Высокий приоритет для первого запроса
       })
 
     if (!response.ok) {

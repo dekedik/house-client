@@ -18,6 +18,16 @@ export default defineConfig({
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
+        // Разделяем vendor и app код для лучшего кеширования
+        manualChunks: (id) => {
+          // Выделяем node_modules в отдельный чанк
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'react-vendor'
+            }
+            return 'vendor'
+          }
+        },
       },
     },
     // Минификация
@@ -30,6 +40,8 @@ export default defineConfig({
     sourcemap: false,
     // Оптимизация CSS
     cssMinify: true,
+    // Увеличиваем лимит предупреждений для больших чанков
+    target: 'es2015', // Используем более старую версию для лучшей совместимости
   },
   // Оптимизация зависимостей
   optimizeDeps: {

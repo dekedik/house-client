@@ -71,7 +71,7 @@ const HomePage = () => {
         setProjects(data || [])
         setOffset(LIMIT)
         
-        // Preload для LCP изображения первого проекта
+        // Агрессивная предзагрузка LCP изображения первого проекта
         if (data && data.length > 0) {
           const firstProject = data[0]
           let firstImage = null
@@ -101,6 +101,12 @@ const HomePage = () => {
             link.href = firstImage
             link.setAttribute('fetchpriority', 'high')
             document.head.appendChild(link)
+            
+            // Дополнительно предзагружаем через new Image() для максимальной скорости
+            const img = new Image()
+            img.src = firstImage
+            img.fetchPriority = 'high'
+            img.loading = 'eager'
           }
         }
       }
@@ -228,7 +234,7 @@ const HomePage = () => {
         {/* Background Image - используем img для правильного определения LCP */}
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&q=70&auto=format"
+            src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&q=65&auto=format"
             alt="Квартиры в новостройках"
             className="absolute inset-0 w-full h-full object-cover"
             width="1920"
