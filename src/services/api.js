@@ -103,6 +103,8 @@ export const api = {
    * @param {number} filters.areaMax - Максимальная площадь
    * @param {number} filters.priceMin - Минимальная цена
    * @param {number} filters.priceMax - Максимальная цена
+   * @param {number} filters.limit - Лимит проектов на странице
+   * @param {number} filters.offset - Смещение для пагинации
    * @returns {Promise<Array>} Массив проектов
    */
   async getProjects(filters = {}) {
@@ -117,6 +119,8 @@ export const api = {
     if (filters.areaMax) params.append('areaMax', filters.areaMax)
     if (filters.priceMin) params.append('priceMin', filters.priceMin)
     if (filters.priceMax) params.append('priceMax', filters.priceMax)
+    if (filters.limit) params.append('limit', filters.limit)
+    if (filters.offset) params.append('offset', filters.offset)
 
     const queryString = params.toString()
     const url = `${API_URL}/v1/projects${queryString ? `?${queryString}` : ''}`

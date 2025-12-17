@@ -167,8 +167,31 @@ const ProjectCard = ({ project }) => {
     touchEndX.current = 0
   }
 
+  // Предзагрузка всех изображений для плавного переключения
+  useEffect(() => {
+    images.forEach((imageUrl) => {
+      if (imageUrl) {
+        const img = new Image()
+        img.src = imageUrl
+      }
+    })
+  }, [images])
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200">
+      {/* Скрытые изображения для предзагрузки */}
+      <div className="hidden">
+        {images.map((imageUrl, index) => (
+          <img
+            key={index}
+            src={imageUrl}
+            alt=""
+            loading="eager"
+            fetchPriority="high"
+          />
+        ))}
+      </div>
+      
       <div className="flex flex-col md:flex-row md:items-stretch md:h-[320px]">
         {/* Блок с изображениями - первым в мобильной версии */}
         {mainImage && (
@@ -189,6 +212,8 @@ const ProjectCard = ({ project }) => {
                     className="select-none"
                     style={{ width: '100%', height: '192px', objectFit: 'cover', display: 'block' }}
                     draggable={false}
+                    loading="eager"
+                    fetchPriority="high"
                   />
                   {project.status && (
                     <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium z-10">
@@ -250,6 +275,8 @@ const ProjectCard = ({ project }) => {
                   src={mainImage}
                   alt={project.name}
                   style={{ width: '100%', height: '192px', objectFit: 'cover', display: 'block' }}
+                  loading="eager"
+                  fetchPriority="high"
                 />
                 {project.status && (
                   <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium">
@@ -274,6 +301,8 @@ const ProjectCard = ({ project }) => {
                     className="select-none w-full h-full"
                     style={{ objectFit: 'cover', display: 'block' }}
                     draggable={false}
+                    loading="eager"
+                    fetchPriority="high"
                   />
                   {project.status && (
                     <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium z-10">
@@ -336,6 +365,8 @@ const ProjectCard = ({ project }) => {
                   alt={project.name}
                   className="w-full h-full"
                   style={{ objectFit: 'cover', display: 'block' }}
+                  loading="eager"
+                  fetchPriority="high"
                 />
                 {project.status && (
                   <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium">

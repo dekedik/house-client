@@ -11,7 +11,11 @@ const HomePage = () => {
   const location = useLocation()
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState(null)
+  const [offset, setOffset] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+  const LIMIT = 5
   const [filters, setFilters] = useState({
     district: '',
     housingClass: '',
@@ -27,6 +31,8 @@ const HomePage = () => {
   const [isMortgageCalculatorOpen, setIsMortgageCalculatorOpen] = useState(false)
   const [isApartmentFinderOpen, setIsApartmentFinderOpen] = useState(false)
   const filterSectionRef = useRef(null)
+  const loadMoreRef = useRef(null)
+  const prevFiltersRef = useRef(null)
 
   // Применяем фильтры из state при навигации (например, из Footer)
   useEffect(() => {
@@ -39,25 +45,86 @@ const HomePage = () => {
     }
   }, [location.state])
 
-  const loadProjects = useCallback(async () => {
+  const loadProjects = useCallback(async (currentOffset = 0, append = false) => {
     try {
-      setLoading(true)
-      const data = await api.getProjects(filters)
-      setProjects(data || [])
+      if (append) {
+        setLoadingMore(true)
+      } else {
+        setLoading(true)
+        setOffset(0)
+        setHasMore(true)
+      }
+      
+      const data = await api.getProjects({
+        ...filters,
+        limit: LIMIT,
+        offset: currentOffset,
+      })
+      
+      if (append) {
+        setProjects(prev => [...prev, ...(data || [])])
+        setOffset(currentOffset + LIMIT)
+      } else {
+        setProjects(data || [])
+        setOffset(LIMIT)
+      }
+      
+      // Проверяем, есть ли еще проекты для загрузки
+      setHasMore((data || []).length === LIMIT)
       setError(null)
     } catch (err) {
       console.error('Ошибка при загрузке проектов:', err)
       setError(err.message || 'Не удалось загрузить проекты')
-      setProjects([])
+      if (!append) {
+        setProjects([])
+      }
     } finally {
       setLoading(false)
+      setLoadingMore(false)
     }
-  }, [filters])
+  }, [filters, LIMIT])
 
   // Загрузка проектов при изменении фильтров (включая первую загрузку)
   useEffect(() => {
-    loadProjects()
-  }, [loadProjects])
+    // Проверяем, изменились ли фильтры (кроме клиентских фильтров для пагинации)
+    const filtersChanged = JSON.stringify(prevFiltersRef.current) !== JSON.stringify(filters)
+    if (filtersChanged || prevFiltersRef.current === null) {
+      prevFiltersRef.current = filters
+      loadProjects(0, false)
+    }
+  }, [filters, loadProjects])
+
+  // Загрузка дополнительных проектов
+  const loadMoreProjects = useCallback(() => {
+    if (!loadingMore && hasMore && !loading) {
+      loadProjects(offset, true)
+    }
+  }, [loadingMore, hasMore, loading, offset, loadProjects])
+
+  // Intersection Observer для infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0]
+        if (target.isIntersecting && hasMore && !loadingMore && !loading) {
+          loadMoreProjects()
+        }
+      },
+      {
+        rootMargin: '200px', // Начинаем загрузку за 200px до элемента
+      }
+    )
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current)
+    }
+
+    return () => {
+      if (loadMoreRef.current) {
+        observer.unobserve(loadMoreRef.current)
+      }
+    }
+  }, [hasMore, loadingMore, loading, loadMoreProjects])
 
   // Фильтрация на клиенте только для тех фильтров, которые не обрабатываются на сервере
   // Серверные фильтры: district, status, housingClass, areaMin, areaMax, priceMin, priceMax
@@ -180,7 +247,7 @@ const HomePage = () => {
             <p className="text-red-600 text-lg mb-4">{error}</p>
             {error.includes('время ожидания') || error.includes('подключения') ? (
               <button
-                onClick={() => loadProjects()}
+                onClick={() => loadProjects(0, false)}
                 className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition"
               >
                 Попробовать снова
@@ -188,11 +255,35 @@ const HomePage = () => {
             ) : null}
           </div>
         ) : filteredProjects.length > 0 ? (
-          <div className="space-y-4">
-            {filteredProjects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
-            ))}
-          </div>
+          <>
+            <div className="space-y-4">
+              {filteredProjects.map((project, index) => {
+                const isLastTwo = index >= filteredProjects.length - 2
+                return (
+                  <React.Fragment key={project.id}>
+                    {isLastTwo && index === filteredProjects.length - 2 && hasMore && (
+                      <div ref={loadMoreRef} className="h-1" />
+                    )}
+                    <ProjectCard project={project} />
+                  </React.Fragment>
+                )
+              })}
+            </div>
+            {/* Скелетон при загрузке дополнительных проектов */}
+            {loadingMore && (
+              <div className="space-y-4 mt-4">
+                {[...Array(2)].map((_, index) => (
+                  <ProjectCardSkeleton key={`skeleton-${index}`} />
+                ))}
+              </div>
+            )}
+            {/* Сообщение, если больше нет проектов */}
+            {!hasMore && filteredProjects.length > 0 && (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Все проекты загружены</p>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-12">
             <p className="text-gray-600 text-lg">По заданным фильтрам ничего не найдено</p>

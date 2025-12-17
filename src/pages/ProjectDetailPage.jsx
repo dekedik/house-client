@@ -59,6 +59,18 @@ const ProjectDetailPage = () => {
     setSelectedImage(0)
   }, [id])
 
+  // Предзагрузка всех изображений для плавного переключения
+  useEffect(() => {
+    if (projectImages && projectImages.length > 0) {
+      projectImages.forEach((imageUrl) => {
+        if (imageUrl) {
+          const img = new Image()
+          img.src = imageUrl
+        }
+      })
+    }
+  }, [projectImages])
+
   // Поддержка клавиатурной навигации для слайдера
   useEffect(() => {
     if (!project?.images) return
@@ -189,6 +201,21 @@ const ProjectDetailPage = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
+      {/* Скрытые изображения для предзагрузки */}
+      {projectImages && projectImages.length > 0 && (
+        <div className="hidden">
+          {projectImages.map((imageUrl, index) => (
+            <img
+              key={index}
+              src={imageUrl}
+              alt=""
+              loading="eager"
+              fetchPriority="high"
+            />
+          ))}
+        </div>
+      )}
+      
       {/* Breadcrumbs */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -220,6 +247,8 @@ const ProjectDetailPage = () => {
                       alt={project.name}
                       className="w-full h-full object-cover select-none"
                       draggable={false}
+                      loading="eager"
+                      fetchPriority="high"
                     />
                     
                     {/* Кнопки навигации слайдера */}
@@ -273,6 +302,8 @@ const ProjectDetailPage = () => {
                     src={project.image}
                     alt={project.name}
                     className="w-full h-full object-cover"
+                    loading="eager"
+                    fetchPriority="high"
                   />
                 )}
                 
@@ -300,6 +331,8 @@ const ProjectDetailPage = () => {
                       src={image}
                       alt={`${project.name} ${index + 1}`}
                       className="w-full h-full object-cover"
+                      loading="eager"
+                      fetchPriority={index < 3 ? "high" : "low"}
                     />
                   </button>
                 ))}
