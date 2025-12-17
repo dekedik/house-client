@@ -59,46 +59,38 @@ const ProjectDetailPage = () => {
     setSelectedImage(0)
   }, [id])
 
-  // Предзагрузка всех изображений для плавного переключения
+  // Предзагрузка изображений для плавного переключения (только текущее + соседние)
   useEffect(() => {
     if (!projectImages || projectImages.length <= 1) return
     
-    // Предзагружаем все изображения через создание Image объектов
-    projectImages.forEach((imageUrl) => {
+    // Предзагружаем только текущее изображение и соседние (предыдущее и следующее)
+    const imagesToPreload = new Set()
+    
+    // Текущее изображение
+    if (projectImages[selectedImage]) {
+      imagesToPreload.add(projectImages[selectedImage])
+    }
+    
+    // Предыдущее изображение
+    const prevIndex = selectedImage === 0 ? projectImages.length - 1 : selectedImage - 1
+    if (projectImages[prevIndex]) {
+      imagesToPreload.add(projectImages[prevIndex])
+    }
+    
+    // Следующее изображение
+    const nextIndex = selectedImage === projectImages.length - 1 ? 0 : selectedImage + 1
+    if (projectImages[nextIndex]) {
+      imagesToPreload.add(projectImages[nextIndex])
+    }
+    
+    // Предзагружаем только нужные изображения
+    imagesToPreload.forEach((imageUrl) => {
       if (imageUrl) {
         const img = new Image()
-        // Устанавливаем обработчики для отслеживания загрузки
-        img.onload = () => {
-          // Изображение успешно загружено и готово к использованию
-        }
-        img.onerror = () => {
-          // Ошибка загрузки - игнорируем
-        }
-        // Начинаем загрузку - устанавливаем src в конце, чтобы обработчики успели установиться
         img.src = imageUrl
       }
     })
-    
-    // Также добавляем preload ссылки в head для более надежной предзагрузки
-    const links = projectImages.map((imageUrl) => {
-      if (!imageUrl) return null
-      const link = document.createElement('link')
-      link.rel = 'preload'
-      link.as = 'image'
-      link.href = imageUrl
-      document.head.appendChild(link)
-      return link
-    }).filter(Boolean)
-    
-    // Очистка при размонтировании
-    return () => {
-      links.forEach(link => {
-        if (link && link.parentNode) {
-          link.parentNode.removeChild(link)
-        }
-      })
-    }
-  }, [projectImages])
+  }, [projectImages, selectedImage])
 
   // Поддержка клавиатурной навигации для слайдера
   useEffect(() => {

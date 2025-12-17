@@ -10,5 +10,24 @@ export default defineConfig({
   define: {
     'import.meta.env.API_URL': JSON.stringify(process.env.API_URL || process.env.VITE_API_URL || ''),
   },
+  build: {
+    // Оптимизация сборки
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Разделяем vendor код на отдельные чанки
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+        },
+      },
+    },
+    // Минификация
+    minify: 'esbuild',
+    // Увеличиваем лимит предупреждений о размере чанков
+    chunkSizeWarningLimit: 1000,
+  },
+  // Оптимизация зависимостей
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom'],
+  },
 })
 
