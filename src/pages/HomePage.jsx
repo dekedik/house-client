@@ -224,13 +224,18 @@ const HomePage = () => {
     <div className="bg-gray-50 min-h-screen">
       {/* Hero Section */}
       <section className="relative text-white py-20 overflow-hidden">
-        {/* Background Image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: 'url(https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&q=75&auto=format)'
-          }}
-        >
+        {/* Background Image - используем img для правильного определения LCP */}
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&q=75&auto=format"
+            alt="Квартиры в новостройках"
+            className="absolute inset-0 w-full h-full object-cover"
+            width="1920"
+            height="1080"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+          />
           {/* Overlay для читаемости текста */}
           <div className="absolute inset-0 bg-gradient-to-r from-primary-600/90 to-primary-800/90"></div>
         </div>
