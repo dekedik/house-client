@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { api } from '../services/api'
 import CallbackModal from '../components/CallbackModal'
@@ -143,12 +143,31 @@ const ProjectDetailPage = () => {
   }
 
   // Получаем images и features (уже распарсены в API, но проверяем для обратной совместимости)
-  const projectImages = project && (Array.isArray(project.images) 
-    ? project.images 
-    : (project.images ? (typeof project.images === 'string' ? JSON.parse(project.images) : []) : []))
-  const projectFeatures = project && (Array.isArray(project.features) 
-    ? project.features 
-    : (project.features ? (typeof project.features === 'string' ? JSON.parse(project.features) : []) : []))
+  const projectImages = useMemo(() => {
+    if (!project) return []
+    if (Array.isArray(project.images)) return project.images
+    if (typeof project.images === 'string') {
+      try {
+        return JSON.parse(project.images)
+      } catch {
+        return []
+      }
+    }
+    return []
+  }, [project?.images])
+
+  const projectFeatures = useMemo(() => {
+    if (!project) return []
+    if (Array.isArray(project.features)) return project.features
+    if (typeof project.features === 'string') {
+      try {
+        return JSON.parse(project.features)
+      } catch {
+        return []
+      }
+    }
+    return []
+  }, [project?.features])
 
   // Обработка свайпа для слайдера изображений
   const handleTouchStart = (e) => {

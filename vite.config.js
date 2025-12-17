@@ -14,10 +14,6 @@ export default defineConfig({
     // Оптимизация сборки
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Разделяем vendor код на отдельные чанки для параллельной загрузки
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-        },
         // Оптимизация имен файлов для лучшего кеширования
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -30,6 +26,8 @@ export default defineConfig({
     cssCodeSplit: true,
     // Оптимизация размера чанков
     chunkSizeWarningLimit: 600,
+    // Отключаем source maps для production чтобы избежать проблем
+    sourcemap: false,
   },
   // Оптимизация зависимостей
   optimizeDeps: {
