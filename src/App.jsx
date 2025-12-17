@@ -1,5 +1,5 @@
-import React, { Suspense, lazy } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import React, { Suspense, lazy, useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
@@ -7,6 +7,40 @@ import ScrollToTop from './components/ScrollToTop'
 // Lazy loading только для тяжелых страниц
 const HomePage = lazy(() => import('./pages/HomePage'))
 const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'))
+
+// Компонент для предзагрузки данных главной страницы
+const DataPrefetcher = () => {
+  const location = useLocation()
+  
+  useEffect(() => {
+    // Если мы на главной странице, предзагружаем данные API сразу
+    if (location.pathname === '/') {
+      // Начинаем загрузку данных API параллельно с загрузкой HomePage компонента
+      // Используем низкий приоритет, чтобы не блокировать критический путь
+      const controller = new AbortController()
+      
+      // Предзагружаем данные API для главной страницы
+      // Браузер может использовать кеш этого запроса когда HomePage сделает реальный запрос
+      fetch('https://admin-doman-horizont.ru/api/v1/projects?limit=5', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        signal: controller.signal,
+        // Используем низкий приоритет для prefetch
+        priority: 'low',
+      }).catch(() => {
+        // Игнорируем ошибки предзагрузки
+      })
+      
+      return () => {
+        controller.abort()
+      }
+    }
+  }, [location.pathname])
+  
+  return null
+}
 
 // Легкие страницы загружаем сразу для быстрого рендера
 import ContactsPage from './pages/ContactsPage'
@@ -21,6 +55,7 @@ function App() {
       }}
     >
       <ScrollToTop />
+      <DataPrefetcher />
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-grow">

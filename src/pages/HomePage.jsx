@@ -38,10 +38,12 @@ const HomePage = () => {
   useEffect(() => {
     if (location.state?.filters) {
       setFilters(location.state.filters)
-      // Прокручиваем к секции с фильтрами
-      setTimeout(() => {
-        filterSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }, 100)
+      // Прокручиваем к секции с фильтрами с использованием requestAnimationFrame для избежания forced reflow
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          filterSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        })
+      })
     }
   }, [location.state])
 
@@ -55,6 +57,7 @@ const HomePage = () => {
         setHasMore(true)
       }
       
+      // Используем кеш браузера если запрос уже был предзагружен
       const data = await api.getProjects({
         ...filters,
         limit: LIMIT,
@@ -225,7 +228,7 @@ const HomePage = () => {
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: 'url(https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&q=80)'
+            backgroundImage: 'url(https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&q=75&auto=format)'
           }}
         >
           {/* Overlay для читаемости текста */}
@@ -368,9 +371,12 @@ const HomePage = () => {
         onClose={() => setIsApartmentFinderOpen(false)}
         onApplyFilters={(filters) => {
           setFilters(filters)
-          setTimeout(() => {
-            filterSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-          }, 100)
+          // Используем двойной requestAnimationFrame для избежания forced reflow
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              filterSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            })
+          })
         }}
       />
 

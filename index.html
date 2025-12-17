@@ -6,6 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Агентство новостроек - Продажа квартир в новостройках. Более 1000 квартир в лучших жилых комплексах." />
     <title>Агентство новостроек - Продажа квартир в новостройках</title>
+    <!-- Критический CSS inline для предотвращения блокировки рендеринга -->
+    <style>
+      body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell','Fira Sans','Droid Sans','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+      #root{min-height:100vh;display:flex;flex-direction:column}
+      .container{width:100%;margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem}
+      @media(min-width:640px){.container{max-width:640px}}
+      @media(min-width:768px){.container{max-width:768px}}
+      @media(min-width:1024px){.container{max-width:1024px}}
+      @media(min-width:1280px){.container{max-width:1280px}}
+    </style>
     <!-- Preconnect для ускорения подключений к критическим источникам -->
     <link rel="preconnect" href="https://admin-doman-horizont.ru" crossorigin />
     <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
@@ -13,8 +23,10 @@
     <link rel="dns-prefetch" href="https://admin-doman-horizont.ru" />
     <link rel="dns-prefetch" href="https://images.unsplash.com" />
     <link rel="dns-prefetch" href="https://api-maps.yandex.ru" />
-    <!-- Preload для LCP изображения (hero background) -->
-    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&q=80" fetchpriority="high" />
+    <!-- Preload для LCP изображения (hero background) с оптимизацией -->
+    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&q=75&auto=format" fetchpriority="high" />
+    <!-- Prefetch для API запроса главной страницы для параллельной загрузки -->
+    <link rel="prefetch" href="https://admin-doman-horizont.ru/api/v1/projects?limit=5" as="fetch" crossorigin="anonymous" />
   </head>
   <body>
     <div id="root"></div>

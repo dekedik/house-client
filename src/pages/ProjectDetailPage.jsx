@@ -47,35 +47,10 @@ const ProjectDetailPage = () => {
 
   // Прокручиваем страницу вверх ДО рендеринга (useLayoutEffect выполняется синхронно)
   useLayoutEffect(() => {
-    // Немедленная прокрутка вверх
-    window.scrollTo(0, 0)
-    if (document.documentElement) {
-      document.documentElement.scrollTop = 0
-    }
-    if (document.body) {
-      document.body.scrollTop = 0
-    }
-  }, [id])
-
-  // Дополнительная прокрутка после рендеринга
-  useEffect(() => {
-    const scrollToTop = () => {
-      window.scrollTo(0, 0)
-      if (document.documentElement) {
-        document.documentElement.scrollTop = 0
-      }
-      if (document.body) {
-        document.body.scrollTop = 0
-      }
-    }
-    
-    // Прокрутка сразу и после задержек для надежности на мобильных
-    scrollToTop()
-    setTimeout(scrollToTop, 0)
-    setTimeout(scrollToTop, 50)
-    setTimeout(scrollToTop, 100)
-    setTimeout(scrollToTop, 200)
-    setTimeout(scrollToTop, 300)
+    // Используем requestAnimationFrame для избежания forced reflow
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+    })
   }, [id])
 
   useEffect(() => {
@@ -142,25 +117,11 @@ const ProjectDetailPage = () => {
       const data = await api.getProjectById(id)
       setProject(data)
       setError(null)
-      
-      // Прокручиваем вверх после загрузки данных
-      setTimeout(() => {
-        window.scrollTo(0, 0)
-        document.documentElement.scrollTop = 0
-        document.body.scrollTop = 0
-      }, 0)
     } catch (err) {
       console.error('Ошибка при загрузке проекта:', err)
       setError(err.message || 'Проект не найден')
     } finally {
       setLoading(false)
-      
-      // Прокручиваем вверх после завершения загрузки
-      setTimeout(() => {
-        window.scrollTo(0, 0)
-        document.documentElement.scrollTop = 0
-        document.body.scrollTop = 0
-      }, 0)
     }
   }
 
@@ -267,8 +228,12 @@ const ProjectDetailPage = () => {
                       src={projectImages[selectedImage] || project.image}
                       alt={project.name}
                       className="w-full h-full object-cover select-none"
+                      width="800"
+                      height="384"
+                      sizes="(max-width: 1024px) 100vw, 800px"
                       draggable={false}
                       loading="eager"
+                      decoding="async"
                     />
                     
                     {/* Кнопки навигации слайдера */}
@@ -322,7 +287,10 @@ const ProjectDetailPage = () => {
                     src={project.image}
                     alt={project.name}
                     className="w-full h-full object-cover"
+                    width="800"
+                    height="384"
                     loading="eager"
+                    decoding="async"
                   />
                 )}
                 
@@ -350,7 +318,10 @@ const ProjectDetailPage = () => {
                       src={image}
                       alt={`${project.name} ${index + 1}`}
                       className="w-full h-full object-cover"
+                      width="200"
+                      height="96"
                       loading="lazy"
+                      decoding="async"
                     />
                   </button>
                 ))}

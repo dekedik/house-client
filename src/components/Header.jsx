@@ -28,6 +28,10 @@ const Header = () => {
               src="/logo.jpg" 
               alt="Горизонт" 
               className="h-10 w-10 rounded-lg object-cover"
+              width="40"
+              height="40"
+              loading="eager"
+              decoding="async"
             />
             <span className="text-xl font-bold text-gray-800">Новостройки</span>
           </Link>

@@ -28,6 +28,8 @@ export default defineConfig({
     chunkSizeWarningLimit: 600,
     // Отключаем source maps для production чтобы избежать проблем
     sourcemap: false,
+    // Оптимизация CSS
+    cssMinify: true,
   },
   // Оптимизация зависимостей
   optimizeDeps: {

@@ -222,8 +222,12 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
                     alt={`${project.name} ${currentImageIndex + 1}`}
                     className="select-none"
                     style={{ width: '100%', height: '192px', objectFit: 'cover', display: 'block' }}
+                    width="400"
+                    height="192"
+                    sizes="(max-width: 768px) 100vw, 400px"
                     draggable={false}
                     loading="eager"
+                    decoding="async"
                     fetchPriority={isFirstProject && currentImageIndex === 0 ? "high" : "auto"}
                   />
                   {project.status && (
@@ -286,7 +290,10 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
                   src={mainImage}
                   alt={project.name}
                   style={{ width: '100%', height: '192px', objectFit: 'cover', display: 'block' }}
+                  width="400"
+                  height="192"
                   loading="eager"
+                  decoding="async"
                   fetchPriority={isFirstProject ? "high" : "auto"}
                 />
                 {project.status && (
@@ -312,8 +319,12 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
                     alt={`${project.name} ${currentImageIndex + 1}`}
                     className="select-none w-full h-full"
                     style={{ objectFit: 'cover', display: 'block' }}
+                    width="512"
+                    height="320"
+                    sizes="(max-width: 768px) 100vw, 512px"
                     draggable={false}
                     loading="eager"
+                    decoding="async"
                     fetchPriority={isFirstProject && currentImageIndex === 0 ? "high" : "auto"}
                   />
                   {project.status && (
@@ -377,7 +388,10 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
                   alt={project.name}
                   className="w-full h-full"
                   style={{ objectFit: 'cover', display: 'block' }}
+                  width="512"
+                  height="320"
                   loading="eager"
+                  decoding="async"
                   fetchPriority={isFirstProject ? "high" : "auto"}
                 />
                 {project.status && (
