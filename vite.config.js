@@ -14,16 +14,33 @@ export default defineConfig({
     // Оптимизация сборки
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Разделяем vendor код на отдельные чанки
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+        manualChunks: (id) => {
+          // Разделяем vendor код на отдельные чанки для параллельной загрузки
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'react-vendor'
+            }
+            // Другие vendor библиотеки в отдельный чанк
+            return 'vendor'
+          }
         },
+        // Оптимизация имен файлов для лучшего кеширования
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
     // Минификация
     minify: 'esbuild',
-    // Увеличиваем лимит предупреждений о размере чанков
-    chunkSizeWarningLimit: 1000,
+    // Включаем CSS code splitting для параллельной загрузки
+    cssCodeSplit: true,
+    // Оптимизация размера чанков
+    chunkSizeWarningLimit: 600,
+    // Уменьшаем размер выходных файлов
+    target: 'esnext',
+    modulePreload: {
+      polyfill: false, // Отключаем polyfill для modulepreload
+    },
   },
   // Оптимизация зависимостей
   optimizeDeps: {

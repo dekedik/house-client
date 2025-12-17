@@ -67,6 +67,39 @@ const HomePage = () => {
       } else {
         setProjects(data || [])
         setOffset(LIMIT)
+        
+        // Preload для LCP изображения первого проекта
+        if (data && data.length > 0) {
+          const firstProject = data[0]
+          let firstImage = null
+          
+          if (firstProject.images) {
+            if (Array.isArray(firstProject.images)) {
+              firstImage = firstProject.images[0]
+            } else if (typeof firstProject.images === 'string') {
+              try {
+                const parsed = JSON.parse(firstProject.images)
+                firstImage = Array.isArray(parsed) ? parsed[0] : null
+              } catch (e) {
+                // Игнорируем ошибку парсинга
+              }
+            }
+          }
+          
+          if (!firstImage && firstProject.image) {
+            firstImage = firstProject.image
+          }
+          
+          if (firstImage) {
+            // Добавляем preload для первого изображения первого проекта
+            const link = document.createElement('link')
+            link.rel = 'preload'
+            link.as = 'image'
+            link.href = firstImage
+            link.setAttribute('fetchpriority', 'high')
+            document.head.appendChild(link)
+          }
+        }
       }
       
       // Проверяем, есть ли еще проекты для загрузки
@@ -259,12 +292,13 @@ const HomePage = () => {
             <div className="space-y-4">
               {filteredProjects.map((project, index) => {
                 const isLastTwo = index >= filteredProjects.length - 2
+                const isFirstProject = index === 0
                 return (
                   <React.Fragment key={project.id}>
                     {isLastTwo && index === filteredProjects.length - 2 && hasMore && (
                       <div ref={loadMoreRef} className="h-1" />
                     )}
-                    <ProjectCard project={project} />
+                    <ProjectCard project={project} isFirstProject={isFirstProject} />
                   </React.Fragment>
                 )
               })}

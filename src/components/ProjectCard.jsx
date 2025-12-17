@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const ProjectCard = ({ project }) => {
+const ProjectCard = ({ project, isFirstProject = false }) => {
   const navigate = useNavigate()
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const touchStartX = useRef(0)
@@ -224,6 +224,7 @@ const ProjectCard = ({ project }) => {
                     style={{ width: '100%', height: '192px', objectFit: 'cover', display: 'block' }}
                     draggable={false}
                     loading="eager"
+                    fetchPriority={isFirstProject && currentImageIndex === 0 ? "high" : "auto"}
                   />
                   {project.status && (
                     <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium z-10">
@@ -286,6 +287,7 @@ const ProjectCard = ({ project }) => {
                   alt={project.name}
                   style={{ width: '100%', height: '192px', objectFit: 'cover', display: 'block' }}
                   loading="eager"
+                  fetchPriority={isFirstProject ? "high" : "auto"}
                 />
                 {project.status && (
                   <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium">
@@ -312,6 +314,7 @@ const ProjectCard = ({ project }) => {
                     style={{ objectFit: 'cover', display: 'block' }}
                     draggable={false}
                     loading="eager"
+                    fetchPriority={isFirstProject && currentImageIndex === 0 ? "high" : "auto"}
                   />
                   {project.status && (
                     <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium z-10">
@@ -375,6 +378,7 @@ const ProjectCard = ({ project }) => {
                   className="w-full h-full"
                   style={{ objectFit: 'cover', display: 'block' }}
                   loading="eager"
+                  fetchPriority={isFirstProject ? "high" : "auto"}
                 />
                 {project.status && (
                   <span className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium">
