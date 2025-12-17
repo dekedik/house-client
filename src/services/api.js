@@ -126,11 +126,13 @@ export const api = {
     const url = `${API_URL}/v1/projects${queryString ? `?${queryString}` : ''}`
 
     try {
+      // Используем кеш браузера если запрос был предзагружен
       const response = await fetchWithTimeout(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
+        cache: 'default', // Используем кеш браузера для предзагруженных запросов
       })
 
     if (!response.ok) {

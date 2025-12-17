@@ -227,7 +227,7 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
                     sizes="(max-width: 768px) 100vw, 400px"
                     draggable={false}
                     loading="eager"
-                    decoding="async"
+                    decoding={isFirstProject && currentImageIndex === 0 ? "sync" : "async"}
                     fetchPriority={isFirstProject && currentImageIndex === 0 ? "high" : "auto"}
                   />
                   {project.status && (
@@ -293,7 +293,7 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
                   width="400"
                   height="192"
                   loading="eager"
-                  decoding="async"
+                  decoding={isFirstProject ? "sync" : "async"}
                   fetchPriority={isFirstProject ? "high" : "auto"}
                 />
                 {project.status && (
@@ -324,7 +324,7 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
                     sizes="(max-width: 768px) 100vw, 512px"
                     draggable={false}
                     loading="eager"
-                    decoding="async"
+                    decoding={isFirstProject && currentImageIndex === 0 ? "sync" : "async"}
                     fetchPriority={isFirstProject && currentImageIndex === 0 ? "high" : "auto"}
                   />
                   {project.status && (
@@ -391,7 +391,7 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
                   width="512"
                   height="320"
                   loading="eager"
-                  decoding="async"
+                  decoding={isFirstProject ? "sync" : "async"}
                   fetchPriority={isFirstProject ? "high" : "auto"}
                 />
                 {project.status && (

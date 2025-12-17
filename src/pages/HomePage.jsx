@@ -126,6 +126,7 @@ const HomePage = () => {
     const filtersChanged = JSON.stringify(prevFiltersRef.current) !== JSON.stringify(filters)
     if (filtersChanged || prevFiltersRef.current === null) {
       prevFiltersRef.current = filters
+      // Начинаем загрузку сразу, не дожидаясь следующего кадра
       loadProjects(0, false)
     }
   }, [filters, loadProjects])
@@ -227,14 +228,14 @@ const HomePage = () => {
         {/* Background Image - используем img для правильного определения LCP */}
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&q=75&auto=format"
+            src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&q=70&auto=format"
             alt="Квартиры в новостройках"
             className="absolute inset-0 w-full h-full object-cover"
             width="1920"
             height="1080"
             loading="eager"
             fetchPriority="high"
-            decoding="async"
+            decoding="sync"
           />
           {/* Overlay для читаемости текста */}
           <div className="absolute inset-0 bg-gradient-to-r from-primary-600/90 to-primary-800/90"></div>
