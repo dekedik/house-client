@@ -549,7 +549,7 @@ const ProjectDetailPage = () => {
                 <div className="grid grid-cols-2 gap-3">
                   {projectFeatures.map((feature, index) => (
                     <div key={index} className="flex items-center space-x-2">
-                      <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="flex-shrink-0 w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       <span className="text-gray-700">{feature}</span>
