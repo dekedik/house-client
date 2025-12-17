@@ -72,6 +72,7 @@ const HomePage = () => {
         setOffset(LIMIT)
         
         // Агрессивная предзагрузка LCP изображения первого проекта
+        // КРИТИЧНО для мобильных устройств - это основной LCP элемент
         if (data && data.length > 0) {
           const firstProject = data[0]
           let firstImage = null
@@ -94,17 +95,36 @@ const HomePage = () => {
           }
           
           if (firstImage) {
+            // Определяем размер экрана для оптимизации
+            const isMobile = window.innerWidth < 768
+            let optimizedImage = firstImage
+            
+            // Оптимизируем URL для мобильных устройств (меньший размер)
+            if (isMobile && firstImage.includes('unsplash.com')) {
+              try {
+                const url = new URL(firstImage)
+                url.searchParams.set('w', '400') // Мобильный размер
+                url.searchParams.set('h', '192')
+                url.searchParams.set('q', '70') // Немного снижаем качество для скорости
+                url.searchParams.set('fit', 'crop')
+                url.searchParams.set('auto', 'format')
+                optimizedImage = url.toString()
+              } catch (e) {
+                // Если не удалось оптимизировать, используем оригинал
+              }
+            }
+            
             // Добавляем preload для первого изображения первого проекта
             const link = document.createElement('link')
             link.rel = 'preload'
             link.as = 'image'
-            link.href = firstImage
+            link.href = optimizedImage
             link.setAttribute('fetchpriority', 'high')
             document.head.appendChild(link)
             
             // Дополнительно предзагружаем через new Image() для максимальной скорости
             const img = new Image()
-            img.src = firstImage
+            img.src = optimizedImage
             img.fetchPriority = 'high'
             img.loading = 'eager'
           }
@@ -235,6 +255,8 @@ const HomePage = () => {
         <div className="absolute inset-0">
           <img
             src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&q=65&auto=format"
+            srcSet="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=640&h=360&fit=crop&q=60&auto=format 640w, https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1280&h=720&fit=crop&q=65&auto=format 1280w, https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&q=65&auto=format 1920w"
+            sizes="100vw"
             alt="Квартиры в новостройках"
             className="absolute inset-0 w-full h-full object-cover"
             width="1920"

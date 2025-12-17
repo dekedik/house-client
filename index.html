@@ -23,8 +23,9 @@
     <link rel="dns-prefetch" href="https://admin-doman-horizont.ru" />
     <link rel="dns-prefetch" href="https://images.unsplash.com" />
     <link rel="dns-prefetch" href="https://api-maps.yandex.ru" />
-    <!-- Preload для LCP изображения (hero background) с оптимизацией -->
-    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&q=65&auto=format" fetchpriority="high" />
+    <!-- Preload для LCP изображения (hero background) с оптимизацией для мобильных -->
+    <!-- Для мобильных используем меньший размер для быстрой загрузки -->
+    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=640&h=360&fit=crop&q=60&auto=format" fetchpriority="high" imagesrcset="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=640&h=360&fit=crop&q=60&auto=format 640w, https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1280&h=720&fit=crop&q=65&auto=format 1280w, https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&q=65&auto=format 1920w" imagesizes="100vw" />
     <!-- Prefetch для API данных главной страницы - критично для LCP -->
     <!-- Используем preload вместо prefetch для более агрессивной загрузки -->
     <link rel="preload" href="https://admin-doman-horizont.ru/api/v1/projects?limit=5&offset=0" as="fetch" crossorigin />

@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { optimizeImageUrl } from '../utils/imageOptimizer'
 
 const ProjectCard = ({ project, isFirstProject = false }) => {
   const navigate = useNavigate()
@@ -98,11 +99,26 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
     images = [project.image]
   }
   
-  const mainImage = images[0] || project.image || ''
-  const sideImage = images[1] || null // Одно изображение справа
-  const bottomImage = images[2] || null // Изображение под основным
-  const hasMoreImages = images.length > 3
-  const currentImage = images[currentImageIndex] || mainImage
+  // Оптимизируем изображения для мобильных устройств
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const optimizedImages = useMemo(() => {
+    return images.map(img => {
+      if (isMobile && img && img.includes('unsplash.com')) {
+        try {
+          return optimizeImageUrl(img, { width: 400, height: 192, quality: 70 })
+        } catch (e) {
+          return img
+        }
+      }
+      return img
+    })
+  }, [images, isMobile])
+  
+  const mainImage = optimizedImages[0] || project.image || ''
+  const sideImage = optimizedImages[1] || null // Одно изображение справа
+  const bottomImage = optimizedImages[2] || null // Изображение под основным
+  const hasMoreImages = optimizedImages.length > 3
+  const currentImage = optimizedImages[currentImageIndex] || mainImage
 
   // Сбрасываем индекс при изменении проекта
   useEffect(() => {
@@ -111,28 +127,28 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
 
   // Поддержка клавиатурной навигации для десктопа
   useEffect(() => {
-    if (images.length <= 1) return
+    if (optimizedImages.length <= 1) return
     
     const handleKeyPress = (e) => {
       if (e.key === 'ArrowLeft') {
-        setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+        setCurrentImageIndex((prev) => (prev === 0 ? optimizedImages.length - 1 : prev - 1))
       } else if (e.key === 'ArrowRight') {
-        setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+        setCurrentImageIndex((prev) => (prev === optimizedImages.length - 1 ? 0 : prev + 1))
       }
     }
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [images.length])
+  }, [optimizedImages.length])
 
   const handlePrevImage = (e) => {
     e.stopPropagation()
-    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+    setCurrentImageIndex((prev) => (prev === 0 ? optimizedImages.length - 1 : prev - 1))
   }
 
   const handleNextImage = (e) => {
     e.stopPropagation()
-    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+    setCurrentImageIndex((prev) => (prev === optimizedImages.length - 1 ? 0 : prev + 1))
   }
 
   const handleDotClick = (index, e) => {
@@ -157,10 +173,10 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
 
     if (distance > minSwipeDistance) {
       // Свайп влево - следующее изображение
-      setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+      setCurrentImageIndex((prev) => (prev === optimizedImages.length - 1 ? 0 : prev + 1))
     } else if (distance < -minSwipeDistance) {
       // Свайп вправо - предыдущее изображение
-      setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+      setCurrentImageIndex((prev) => (prev === 0 ? optimizedImages.length - 1 : prev - 1))
     }
 
     touchStartX.current = 0
@@ -169,26 +185,26 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
 
   // Предзагрузка изображений для плавного переключения (только текущее + соседние)
   useEffect(() => {
-    if (images.length <= 1) return
+    if (optimizedImages.length <= 1) return
     
     // Предзагружаем только текущее изображение и соседние (предыдущее и следующее)
     const imagesToPreload = new Set()
     
     // Текущее изображение
-    if (images[currentImageIndex]) {
-      imagesToPreload.add(images[currentImageIndex])
+    if (optimizedImages[currentImageIndex]) {
+      imagesToPreload.add(optimizedImages[currentImageIndex])
     }
     
     // Предыдущее изображение
-    const prevIndex = currentImageIndex === 0 ? images.length - 1 : currentImageIndex - 1
-    if (images[prevIndex]) {
-      imagesToPreload.add(images[prevIndex])
+    const prevIndex = currentImageIndex === 0 ? optimizedImages.length - 1 : currentImageIndex - 1
+    if (optimizedImages[prevIndex]) {
+      imagesToPreload.add(optimizedImages[prevIndex])
     }
     
     // Следующее изображение
-    const nextIndex = currentImageIndex === images.length - 1 ? 0 : currentImageIndex + 1
-    if (images[nextIndex]) {
-      imagesToPreload.add(images[nextIndex])
+    const nextIndex = currentImageIndex === optimizedImages.length - 1 ? 0 : currentImageIndex + 1
+    if (optimizedImages[nextIndex]) {
+      imagesToPreload.add(optimizedImages[nextIndex])
     }
     
     // Предзагружаем только нужные изображения
@@ -207,7 +223,7 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
         {mainImage && (
           <div className="md:w-2/5 flex-shrink-0 p-2 md:p-4 flex items-stretch order-1 md:order-2">
             {/* Мобильный слайдер */}
-            {images.length > 1 ? (
+            {optimizedImages.length > 1 ? (
               <div className="md:hidden relative rounded-lg overflow-hidden w-full" style={{ height: '192px' }}>
                 <div 
                   className="relative w-full h-full"
@@ -242,7 +258,7 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
                   )}
                   
                   {/* Кнопки навигации */}
-                  {images.length > 1 && (
+                  {optimizedImages.length > 1 && (
                     <>
                       <button
                         onClick={handlePrevImage}
@@ -266,9 +282,9 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
                   )}
                   
                   {/* Индикаторы (точки) */}
-                  {images.length > 1 && (
+                  {optimizedImages.length > 1 && (
                     <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-                      {images.map((_, index) => (
+                      {optimizedImages.map((_, index) => (
                         <button
                           key={index}
                           onClick={(e) => handleDotClick(index, e)}
@@ -310,7 +326,7 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
             )}
             
             {/* Десктопная версия - слайдер */}
-            {images.length > 1 ? (
+            {optimizedImages.length > 1 ? (
               <div className="hidden md:block relative rounded-lg overflow-hidden w-full h-full">
                 <div className="relative w-full h-full">
                   <img
@@ -339,7 +355,7 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
                   )}
                   
                   {/* Кнопки навигации */}
-                  {images.length > 1 && (
+                  {optimizedImages.length > 1 && (
                     <>
                       <button
                         onClick={handlePrevImage}
@@ -363,9 +379,9 @@ const ProjectCard = ({ project, isFirstProject = false }) => {
                   )}
                   
                   {/* Индикаторы (точки) */}
-                  {images.length > 1 && (
+                  {optimizedImages.length > 1 && (
                     <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-                      {images.map((_, index) => (
+                      {optimizedImages.map((_, index) => (
                         <button
                           key={index}
                           onClick={(e) => handleDotClick(index, e)}
