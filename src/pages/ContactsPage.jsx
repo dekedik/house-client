@@ -1,98 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
 
-const ContactsPage = React.memo(() => {
-  const mapRef = useRef(null)
-  const mapInstanceRef = useRef(null)
-  const [mapLoading, setMapLoading] = useState(true)
-
-  useEffect(() => {
-    let isMounted = true
-    
-    // Загружаем скрипт Яндекс карт асинхронно, не блокируя рендер
-    const loadMap = () => {
-      if (!window.ymaps) {
-        const script = document.createElement('script')
-        script.src = 'https://api-maps.yandex.ru/2.1/?apikey=&lang=ru_RU'
-        script.async = true
-        script.defer = true
-        document.head.appendChild(script)
-        
-        script.onload = () => {
-          if (!isMounted) return
-          window.ymaps.ready(() => {
-            if (!isMounted) return
-            initMap()
-            setMapLoading(false)
-          })
-        }
-        
-        script.onerror = () => {
-          if (!isMounted) return
-          setMapLoading(false)
-        }
-      } else {
-        window.ymaps.ready(() => {
-          if (!isMounted) return
-          initMap()
-          setMapLoading(false)
-        })
-      }
-    }
-
-    function initMap() {
-      if (!mapRef.current || mapInstanceRef.current || !isMounted) return
-
-      // Координаты: проспект Михаила Нагибина, 38
-      const coordinates = [47.264380, 39.721714]
-
-      try {
-        // Создаем карту
-        mapInstanceRef.current = new window.ymaps.Map(mapRef.current, {
-          center: coordinates,
-          zoom: 16,
-          controls: ['zoomControl', 'fullscreenControl']
-        })
-
-        // Добавляем метку
-        const placemark = new window.ymaps.Placemark(
-          coordinates,
-          {
-            balloonContent: 'проспект Михаила Нагибина, 38, Ростов-на-Дону, 344068',
-            hintContent: 'Наш офис'
-          },
-          {
-            preset: 'islands#blueDotIcon'
-          }
-        )
-
-        mapInstanceRef.current.geoObjects.add(placemark)
-      } catch (error) {
-        console.error('Ошибка инициализации карты:', error)
-        setMapLoading(false)
-      }
-    }
-
-    // Загружаем карту с небольшой задержкой, чтобы не блокировать рендер
-    const timer = setTimeout(() => {
-      loadMap()
-    }, 100)
-
-    // Очистка при размонтировании
-    return () => {
-      isMounted = false
-      clearTimeout(timer)
-      if (mapInstanceRef.current) {
-        try {
-          mapInstanceRef.current.destroy()
-        } catch (e) {
-          // Игнорируем ошибки при уничтожении
-        }
-        mapInstanceRef.current = null
-      }
-    }
-  }, [])
-
+const ContactsPage = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Breadcrumbs */}
@@ -139,13 +48,13 @@ const ContactsPage = React.memo(() => {
                 <h3 className="text-lg font-semibold text-gray-700 mb-4">Адрес</h3>
                 <p className="text-gray-600 text-lg">
                   г. Ростов-на-Дону<br />
-                  проспект Михаила Нагибина, д.38
+                  ул. Михаила Нагибина, д.38
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mb-8">
+          <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">Режим работы</h2>
             <div className="space-y-2 text-gray-600">
               <p className="text-lg"><span className="font-semibold">Понедельник - Пятница:</span> 9:00 - 19:00</p>
@@ -153,32 +62,11 @@ const ContactsPage = React.memo(() => {
               <p className="text-lg"><span className="font-semibold">Воскресенье:</span> Выходной</p>
             </div>
           </div>
-
-          {/* Яндекс карта */}
-          <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Как нас найти</h2>
-            <div 
-              ref={mapRef}
-              className="w-full h-96 rounded-lg overflow-hidden bg-gray-100 relative"
-              style={{ minHeight: '400px' }}
-            >
-              {mapLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                  <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-                    <p className="mt-2 text-gray-600 text-sm">Загрузка карты...</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </section>
     </div>
   )
-})
-
-ContactsPage.displayName = 'ContactsPage'
+}
 
 export default ContactsPage
 

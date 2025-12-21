@@ -253,14 +253,20 @@ const HomePage = () => {
       <section className="relative text-white py-20 overflow-hidden">
         {/* Background Image - используем img для правильного определения LCP */}
         <div className="absolute inset-0">
+          {/* Мобильная версия */}
           <img
-            src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&q=65&auto=format"
-            srcSet="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=640&h=360&fit=crop&q=60&auto=format 640w, https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1280&h=720&fit=crop&q=65&auto=format 1280w, https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&h=1080&fit=crop&q=65&auto=format 1920w"
-            sizes="100vw"
+            src="/mobilka2.png"
             alt="Квартиры в новостройках"
-            className="absolute inset-0 w-full h-full object-cover"
-            width="1920"
-            height="1080"
+            className="absolute inset-0 w-full h-full object-cover md:hidden"
+            loading="eager"
+            fetchPriority="high"
+            decoding="sync"
+          />
+          {/* Десктопная версия */}
+          <img
+            src="/sait.png"
+            alt="Квартиры в новостройках"
+            className="hidden md:block absolute inset-0 w-full h-full object-cover"
             loading="eager"
             fetchPriority="high"
             decoding="sync"

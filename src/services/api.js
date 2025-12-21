@@ -33,6 +33,61 @@ const fetchWithTimeout = (url, options = {}, timeout = REQUEST_TIMEOUT) => {
   })
 }
 
+// Универсальная функция для GET запросов
+/**
+ * Выполняет GET запрос к API
+ * @param {string} endpoint - Эндпоинт (например, '/v1/projects' или '/v1/projects/123')
+ * @param {Object} params - Query параметры (объект с ключами и значениями)
+ * @param {Object} options - Дополнительные опции для fetch (headers, cache, priority и т.д.)
+ * @returns {Promise<any>} JSON ответ от сервера
+ */
+const getFetch = async (endpoint, params = {}, options = {}) => {
+  // Формируем query параметры
+  const queryParams = new URLSearchParams()
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      queryParams.append(key, value)
+    }
+  })
+
+  const queryString = queryParams.toString()
+  const url = `${API_URL}${endpoint}${queryString ? `?${queryString}` : ''}`
+
+  try {
+    const response = await fetchWithTimeout(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      cache: options.cache || 'default',
+      priority: options.priority || 'auto',
+      ...options,
+    })
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Ресурс не найден')
+      }
+      if (response.status >= 500) {
+        throw new Error(`Ошибка сервера: ${response.status}`)
+      }
+      throw new Error(`Ошибка при загрузке данных: ${response.status}`)
+    }
+
+    return await response.json()
+  } catch (error) {
+    // Обработка сетевых ошибок и таймаутов
+    if (error.message && error.message.includes('Превышено время ожидания')) {
+      throw new Error('Превышено время ожидания ответа от сервера. Попробуйте позже.')
+    }
+    if (error.name === 'AbortError' || (error instanceof TypeError && (error.message.includes('fetch') || error.message.includes('Failed to fetch')))) {
+      throw new Error('Ошибка подключения к серверу. Проверьте подключение к интернету.')
+    }
+    throw error
+  }
+}
+
 // Функция для парсинга JSON полей (images, features)
 const parseJsonField = (field) => {
   if (!field) return null
@@ -92,6 +147,8 @@ const processProject = (project) => {
 }
 
 export const api = {
+  // Экспортируем универсальную функцию GET запросов
+  getFetch,
   /**
    * Получить все проекты с фильтрами
    * @param {Object} filters - Объект с фильтрами
